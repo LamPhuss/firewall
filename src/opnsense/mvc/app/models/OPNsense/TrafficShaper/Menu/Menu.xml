@@ -1,0 +1,9 @@
+<menu>
+    <Firewall>
+        <TrafficShaper VisibleName="Shaper" cssClass="fa fa-filter fa-fw" visibility="delete">
+            <Pipes order="10" url="/ui/trafficshaper/pipe"/>
+            <Queues order="20" url="/ui/trafficshaper/queue"/>
+            <Rules order="30" url="/ui/trafficshaper/rule"/>
+        </TrafficShaper>
+    </Firewall>
+</menu>

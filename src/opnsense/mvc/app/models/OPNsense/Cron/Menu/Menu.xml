@@ -1,0 +1,9 @@
+<menu>
+    <System>
+        <Settings visibility="delete">
+            <Cron url="/ui/cron">
+                <item url="/ui/cron/*" visibility="hidden"/>
+            </Cron>
+        </Settings>
+    </System>
+</menu>

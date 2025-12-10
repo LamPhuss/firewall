@@ -1,0 +1,7 @@
+pkg.opnsense.org,vuxml.freebsd.org
+# [i] fetch certificate for https://pkg.opnsense.org
+# [i] fetch certificate for https://vuxml.freebsd.org
+# [i] fetch CRL from http://cdp.rapidssl.com/RapidSSLTLSRSACAG1.crl
+# [i] fetch CRL from http://crl3.digicert.com/DigiCertGlobalRootG2.crl
+# [i] fetch CRL from http://e7.c.lencr.org/109.crl
+# [i] fetch CRL from http://x1.c.lencr.org/

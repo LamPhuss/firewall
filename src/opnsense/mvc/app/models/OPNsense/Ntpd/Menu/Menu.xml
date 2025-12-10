@@ -1,0 +1,12 @@
+<menu>
+    <Services>
+        <NTPD VisibleName="Network Time" cssClass="fa fa-clock-o fa-fw" visibility="delete">
+            <General order="10" url="/ui/ntpd/general"/>
+            <GPS order="20" url="/ui/ntpd/gps"/>
+            <PPS order="30" url="/ui/ntpd/pps"/>
+            <LeapSeconds VisibleName="Leap Seconds" order="40" url="/ui/ntpd/leap"/>
+            <Status order="50" url="/ui/ntpd/status"/>
+            <LogFile order="60" VisibleName="Log File" url="/ui/diagnostics/log/core/ntpd"/>
+        </NTPD>
+    </Services>
+</menu>

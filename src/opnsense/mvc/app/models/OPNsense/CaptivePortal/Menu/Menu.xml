@@ -1,0 +1,10 @@
+<menu>
+    <Services>
+        <CaptivePortal cssClass="fa fa-th fa-fw" visibility="delete">
+            <Settings order="10" url="/ui/captiveportal"/>
+            <Sessions order="20" url="/ui/captiveportal/session"/>
+            <Vouchers order="30" url="/ui/captiveportal/vouchers"/>
+            <LogFile order="40" VisibleName="Log File" url="/ui/diagnostics/log/core/captiveportal"/>
+        </CaptivePortal>
+    </Services>
+</menu>

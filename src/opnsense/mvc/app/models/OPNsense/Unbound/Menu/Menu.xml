@@ -1,0 +1,14 @@
+<menu>
+    <Services>
+        <Unbound VisibleName="Unbound DNS" cssClass="fa fa-ban fa-fw" visibility="delete">
+            <General order="10" url="/ui/unbound/general"/>
+            <Dnsbl VisibleName="Blocklist" order="20" url="/ui/unbound/dnsbl"/>
+            <Forwarding VisibleName="Query Forwarding" order="30" url="/ui/unbound/forward"/>
+            <Dots VisibleName="DNS over TLS" order="40" url="/ui/unbound/dot"/>
+            <Overrides order="50" url="/ui/unbound/overrides"/>
+            <Advanced order="60" url="/ui/unbound/advanced"/>
+            <ACLs order="70" VisibleName="Access Lists" url="/ui/unbound/acl"/>
+            <LogFile order="80" VisibleName="Log File" url="/ui/diagnostics/log/core/dnsmasq"/>
+        </Unbound>
+    </Services>
+</menu>

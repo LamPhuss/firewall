@@ -1,0 +1,9 @@
+<menu>
+    <Services>
+        <IDS VisibleName="Intrusion Detection" cssClass="fa fa-bug fa-fw" visibility="delete">
+            <Settings url="/ui/ids/settings"/>
+            <Administration order="10" url="/ui/ids"/>
+            <LogFile order="20" VisibleName="Log File" url="/ui/diagnostics/log/core/suricata" />
+        </IDS>
+    </Services>
+</menu>
