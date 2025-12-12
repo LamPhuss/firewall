@@ -11,7 +11,7 @@
         </Password>
         <Logout order="3" url="/index.php?logout" cssClass="fa fa-sign-out fa-fw"/>
     </Lobby>
-    <Reporting order="15" cssClass="fa fa-area-chart">
+    <Reporting order="15" cssClass="fa fa-area-chart" visibility="delete">
         <Settings order="10" url="/reporting_settings.php" cssClass="fa fa-cog fa-fw" visibility="delete"/>
         <Traffic order="20" url="/ui/diagnostics/traffic" cssClass="fa fa-line-chart fa-fw" visibility="delete"/>
         <DNS order="30" VisibleName="Unbound DNS" url="/ui/unbound/overview" cssClass="fa fa-bar-chart fa-fw" visibility="delete"/>
@@ -20,17 +20,17 @@
         <Access cssClass="fa fa-users fa-fw">
             <Users order="10" url="/ui/auth/user"/>
             <Groups order="20" url="/ui/auth/group"/>
-            <Privileges order="25" url="/ui/auth/priv" visibility="delete"/>
+            <Privileges order="25" url="/ui/auth/priv"/>
             <Servers order="30" url="/system_authservers.php" visibility="delete">
                 <Edit url="/system_authservers.php*" visibility="hidden"/>
             </Servers>
             <Tester order="40" url="/diag_authentication.php" visibility="delete"/>
         </Access>
-        <Configuration cssClass="fa fa-history fa-fw" visibility="delete">
+        <Configuration cssClass="fa fa-history fa-fw">
             <Backups url="/diag_backup.php"/>
             <Defaults url="/ui/core/defaults"/>
             <History url="/ui/core/backup/history/this"/>
-            <Wizard url="/ui/core/initial_setup"/>
+            <Wizard url="/ui/core/initial_setup" visibility="delete"/>
         </Configuration>
         <Firmware cssClass="fa fa-building-o fa-fw" visibility="delete">
             <Status order="10" url="/ui/core/firmware#status"/>
@@ -42,9 +42,9 @@
             <Reporter order="70" url="/crash_reporter.php"/>
             <LogFile order="80" VisibleName="Log File" url="/ui/diagnostics/log/core/pkg"/>
         </Firmware>
-        <Gateways cssClass="fa fa-location-arrow fa-fw" visibility="delete">
+        <Gateways cssClass="fa fa-location-arrow fa-fw">
             <Configuration order="10" url="/ui/routing/configuration"/>
-            <Group order="20" url="/system_gateway_groups.php">
+            <Group order="20" url="/system_gateway_groups.php" visibility="delete">
                 <List url="/system_gateway_groups.php*" visibility="hidden"/>
                 <Edit url="/system_gateway_groups_edit.php*" visibility="hidden"/>
             </Group>
@@ -56,18 +56,19 @@
         </HighAvailability>
         <Routes cssClass="fa fa-map-signs fa-fw">
             <Configuration order="10" url="/ui/routes" />
+            <Status order="20" url="/ui/diagnostics/interface/routes"/>
             <LogFile order="100" VisibleName="Log File" url="/ui/diagnostics/log/core/routing"/>
         </Routes>
-        <Settings cssClass="fa fa-cogs fa-fw" visibility="delete">
+        <Settings cssClass="fa fa-cogs fa-fw">
             <Administration url="/system_advanced_admin.php"/>
-            <General url="/system_general.php">
+            <General url="/system_general.php" visibility="delete">
                 <Edit url="/system_general.php*" visibility="hidden"/>
             </General>
-            <Miscellaneous url="/system_advanced_misc.php"/>
-            <Tunables url="/ui/core/tunables"/>
+            <Miscellaneous url="/system_advanced_misc.php" visibility="delete"/>
+            <Tunables url="/ui/core/tunables" visibility="delete"/>
         </Settings>
         <Snapshots cssClass="fa fa-hdd-o fa-fw" url="/ui/core/snapshots" visibility="delete"/>
-        <Trust cssClass="fa fa-certificate fa-fw" visibility="delete">
+        <Trust cssClass="fa fa-certificate fa-fw">
             <Authorities url="/ui/trust/ca"/>
             <Certificates url="/ui/trust/cert"/>
             <Revocation url="/ui/trust/crl"/>
@@ -83,10 +84,13 @@
         <Diagnostics order="160" cssClass="fa fa-medkit fa-fw" visibility="delete">
             <Services url="/ui/core/service"/>
         </Diagnostics>
+        <Settings cssClass="fa fa-cogs fa-fw">
+            <Administration url="/system_advanced_admin.php"/>
+        </Settings>
     </System>
     <Interfaces order="30" cssClass="fa fa-sitemap"/>
     <Firewall order="40" cssClass="fa fa-fire">
-        <Aliases url="/ui/firewall/alias" cssClass="fa fa-list-alt fa-fw" visibility="delete">
+        <Aliases url="/ui/firewall/alias" cssClass="fa fa-list-alt fa-fw">
             <Edit url="/ui/firewall/alias/*" visibility="hidden"/>
         </Aliases>
         <Categories url="/ui/firewall/category" cssClass="fa fa-tags fa-fw" visibility="delete"/>
@@ -95,7 +99,7 @@
             <PortForward order="100" VisibleName="Port Forward" url="/firewall_nat.php">
                 <Edit url="/firewall_nat_edit.php*" visibility="hidden"/>
             </PortForward>
-            <Outbound order="300" VisibleName="Outbound" url="/firewall_nat_out.php" visibility="delete">
+            <Outbound order="300" VisibleName="Outbound" url="/firewall_nat_out.php">
                 <Edit url="/firewall_nat_out_edit.php*" visibility="hidden"/>
             </Outbound>
         </NAT>
@@ -119,7 +123,7 @@
         <LogFiles order="400" VisibleName="Log Files" cssClass="fa fa-eye fa-fw">
             <General VisibleName="General" url="/ui/diagnostics/log/core/firewall"/>
             <Live VisibleName="Live View" url="/ui/diagnostics/firewall/log"/>
-            <Overview url="/ui/diagnostics/firewall/stats" visibility="delete"/>
+            <Overview url="/ui/diagnostics/firewall/stats"/>
             <Plain VisibleName="Plain View" url="/ui/diagnostics/log/core/filter" visibility="delete"/>
         </LogFiles>
     </Firewall>
@@ -134,8 +138,8 @@
         <OpenDNS VisibleName="OpenDNS" url="/services_opendns.php" cssClass="fa fa-tags fa-fw" visibility="delete"/>
         <RouterAdv VisibleName="Router Advertisements" cssClass="fa fa-bullseye fa-fw" visibility="delete" />
     </Services>
-    <VPN order="50" cssClass="fa fa-globe" visibility="delete">
-        <OpenVPN cssClass="fa fa-lock fa-fw">
+    <VPN order="50" cssClass="fa fa-globe">
+        <OpenVPN cssClass="fa fa-lock fa-fw" visibility="delete">
             <Instances order="10" url="/ui/openvpn/instances"/>
             <!-- XXX order gap for client/server legacy pages -->
             <CSC order="30" VisibleName="Client Specific Overrides" url="/ui/openvpn/client_overwrites"/>
@@ -145,8 +149,15 @@
             <Status order="60" VisibleName="Connection Status" url="/ui/openvpn/status"/>
             <LogFile order="70" VisibleName="Log File" url="/ui/diagnostics/log/core/openvpn"/>
         </OpenVPN>
+        <WireGuard cssClass="fa fa-lock fa-fw">
+            <Instances order="10" url="/ui/wireguard/general#instances"/>
+            <Peers order="20" url="/ui/wireguard/general#peers"/>
+            <PeerGenerator order="30" VisibleName="Peers Generator" url="/ui/wireguard/general#configbuilder"/>
+            <Status order="40" url="/ui/wireguard/diagnostics/"/>
+            <LogFile order="50" VisibleName="Log File" url="/ui/diagnostics/log/core/wireguard"/>
+        </WireGuard>
     </VPN>
-    <Power order="70" cssClass="fa fa-plug" visibility="delete">
+    <Power order="70" cssClass="fa fa-plug">
         <Reboot order="10" url="/ui/core/reboot" cssClass="fa fa-repeat fa-fw"/>
         <PowerOff VisibleName="Power Off" order="20" url="/ui/core/halt" cssClass="fa fa-power-off fa-fw"/>
     </Power>
