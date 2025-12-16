@@ -633,12 +633,13 @@
         </span>
     </div>
 </div>
-<ul class="nav nav-tabs" data-tabs="tabs" id="maintabs">
+<!-- TODO: delete geoip <ul class="nav nav-tabs" data-tabs="tabs" id="maintabs">
     <li><a data-toggle="tab" href="#aliases" id="aliases_tab">{{ lang._('Aliases') }}</a></li>
     <li><a data-toggle="tab" href="#geoip" id="geoip_tab">{{ lang._('GeoIP settings') }}</a></li>
-</ul>
+</ul> -->
 
-<div class="tab-content content-box">
+<!-- <div class="tab-content content-box"> -->
+<div class="content-box">
     <div id="aliases" class="tab-pane fade in">
         <div class="row">
             <section class="col-xs-12">
@@ -714,9 +715,9 @@
             </section>
         </div>
     </div>
-    <div id="geoip" class="tab-pane fade in">
+    <!-- <div id="geoip" class="tab-pane fade in">
       {{ partial("layout_partials/base_form",['fields':formGeoIPSettings,'id':'frm_GeopIPSettings'])}}
-    </div>
+    </div> -->
 </div>
 {{ partial('layout_partials/base_apply_button', {'data_endpoint': '/api/firewall/alias/reconfigure'}) }}
 

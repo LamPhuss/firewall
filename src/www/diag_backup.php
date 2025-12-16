@@ -217,6 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $data = "";
 
             /* backup entire configuration */
+            // TODO: change config file
             $data = file_get_contents('/conf/config.xml');
 
             /* backup RRD data */
