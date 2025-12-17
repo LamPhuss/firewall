@@ -1,0 +1,92 @@
+<model>
+    <mount>//OPNsense/remoteaccess</mount>
+    <description>Remote Access Connection Manager</description>
+    <version>1.0.0</version>
+    <items>
+        <general>
+            <enabled type="BooleanField">
+                <default>0</default>
+                <Required>Y</Required>
+            </enabled>
+            <port type="IntegerField">
+                <default>8080</default>
+                <MinimumValue>1024</MinimumValue>
+                <MaximumValue>65535</MaximumValue>
+                <Required>Y</Required>
+            </port>
+            <ssl_enabled type="BooleanField">
+                <default>1</default>
+                <Required>Y</Required>
+            </ssl_enabled>
+            <max_connections type="IntegerField">
+                <default>10</default>
+                <MinimumValue>1</MinimumValue>
+                <MaximumValue>100</MaximumValue>
+                <Required>Y</Required>
+            </max_connections>
+        </general>
+
+        <connections>
+            <connection type="ArrayField">
+                <enabled type="BooleanField">
+                    <default>1</default>
+                    <Required>Y</Required>
+                </enabled>
+                <name type="TextField">
+                    <Required>Y</Required>
+                    <mask>/^[a-zA-Z0-9\-_]{1,64}$/</mask>
+                    <ValidationMessage>Name should contain only alphanumeric characters, dash and underscore (max 64 chars)</ValidationMessage>
+                </name>
+                <description type="TextField">
+                    <Required>N</Required>
+                </description>
+                <protocol type="OptionField">
+                    <Required>Y</Required>
+                    <default>ssh</default>
+                    <OptionValues>
+                        <ssh>SSH</ssh>
+                        <vnc>VNC</vnc>
+                        <rdp>RDP</rdp>
+                        <telnet>Telnet</telnet>
+                    </OptionValues>
+                </protocol>
+                <hostname type="TextField">
+                    <Required>Y</Required>
+                    <mask>/^[a-zA-Z0-9\.\-]{1,255}$/</mask>
+                    <ValidationMessage>Invalid hostname or IP address</ValidationMessage>
+                </hostname>
+                <port type="PortField">
+                    <Required>Y</Required>
+                </port>
+                <username type="TextField">
+                    <Required>N</Required>
+                </username>
+                <password type="TextField">
+                    <Required>N</Required>
+                </password>
+                <private_key type="TextField">
+                    <Required>N</Required>
+                </private_key>
+                <domain type="TextField">
+                    <Required>N</Required>
+                </domain>
+                <color_scheme type="OptionField">
+                    <Required>N</Required>
+                    <default>gray-black</default>
+                    <OptionValues>
+                        <gray-black>Gray on Black</gray-black>
+                        <green-black>Green on Black</green-black>
+                        <white-black>White on Black</white-black>
+                        <black-white>Black on White</black-white>
+                    </OptionValues>
+                </color_scheme>
+                <font_size type="IntegerField">
+                    <Required>N</Required>
+                    <default>12</default>
+                    <MinimumValue>8</MinimumValue>
+                    <MaximumValue>24</MaximumValue>
+                </font_size>
+            </connection>
+        </connections>
+    </items>
+</model>

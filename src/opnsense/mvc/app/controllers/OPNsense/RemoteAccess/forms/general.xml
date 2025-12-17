@@ -1,0 +1,26 @@
+<form>
+    <field>
+        <id>remoteaccess.general.enabled</id>
+        <label>Enable Remote Access Service</label>
+        <type>checkbox</type>
+        <help>Enable or disable the Remote Access service</help>
+    </field>
+    <field>
+        <id>remoteaccess.general.port</id>
+        <label>Service Port</label>
+        <type>text</type>
+        <help>Port number for Guacamole web interface (default: 8080)</help>
+    </field>
+    <field>
+        <id>remoteaccess.general.ssl_enabled</id>
+        <label>Enable SSL</label>
+        <type>checkbox</type>
+        <help>Enable SSL/TLS encryption for connections</help>
+    </field>
+    <field>
+        <id>remoteaccess.general.max_connections</id>
+        <label>Maximum Connections</label>
+        <type>text</type>
+        <help>Maximum number of concurrent connections (1-100)</help>
+    </field>
+</form>

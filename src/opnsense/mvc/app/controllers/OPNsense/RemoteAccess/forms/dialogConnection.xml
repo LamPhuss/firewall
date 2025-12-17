@@ -1,0 +1,78 @@
+<form>
+    <field>
+        <id>connection.enabled</id>
+        <label>Enabled</label>
+        <type>checkbox</type>
+        <help>Enable or disable this connection</help>
+    </field>
+    <field>
+        <id>connection.name</id>
+        <label>Name</label>
+        <type>text</type>
+        <help>Unique name for this connection</help>
+    </field>
+    <field>
+        <id>connection.description</id>
+        <label>Description</label>
+        <type>text</type>
+        <help>Optional description</help>
+    </field>
+    <field>
+        <id>connection.protocol</id>
+        <label>Protocol</label>
+        <type>dropdown</type>
+        <help>Connection protocol (SSH, VNC, RDP, Telnet)</help>
+    </field>
+    <field>
+        <id>connection.hostname</id>
+        <label>Hostname/IP</label>
+        <type>text</type>
+        <help>Hostname or IP address of the remote host</help>
+    </field>
+    <field>
+        <id>connection.domain</id>
+        <label>Domain</label>
+        <type>text</type>
+        <help>Windows domain (leave empty for local accounts)</help>
+        <style>display:none</style>
+        <grid_view>
+            <visible>false</visible>
+        </grid_view>
+    </field>
+    <field>
+        <id>connection.port</id>
+        <label>Port</label>
+        <type>text</type>
+        <help>Port number (will auto-fill based on protocol)</help>
+    </field>
+    <field>
+        <id>connection.username</id>
+        <label>Username</label>
+        <type>text</type>
+        <help>Username for authentication</help>
+        <style>display:none</style>
+        <grid_view>
+            <visible>false</visible>
+        </grid_view>
+    </field>
+    <field>
+        <id>connection.password</id>
+        <label>Password</label>
+        <type>text</type>
+        <help>Password for authentication</help>
+        <style>display:none</style>
+        <grid_view>
+            <visible>false</visible>
+        </grid_view>
+    </field>
+    <field>
+        <id>connection.private_key</id>
+        <label>Private Key</label>
+        <type>textbox</type>
+        <help>SSH private key (for key-based authentication)</help>
+        <style>height: 150px; display:none</style>
+        <grid_view>
+            <visible>false</visible>
+        </grid_view>
+    </field>
+</form>

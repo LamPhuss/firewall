@@ -1,0 +1,10 @@
+<acl>
+    <page-remoteaccess-connections>
+        <name>Remote Access: Connections</name>
+        <description>Allow access to Remote Access Connections</description>
+        <patterns>
+            <pattern>ui/remoteaccess/index/connections</pattern>
+            <pattern>api/remoteaccess/connections/*</pattern>
+        </patterns>
+    </page-remoteaccess-connections>
+</acl>

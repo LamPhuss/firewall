@@ -1,0 +1,8 @@
+<menu>
+    <Services>
+        <RemoteAccess cssClass="fa fa-desktop" order="70" VisibleName="Remote Access">
+            <General url="/ui/remoteaccess/general" order="10" VisibleName="General"/>
+            <Connections url="/ui/remoteaccess/connections" order="20" VisibleName="Connections"/>
+        </RemoteAccess>
+    </Services>
+</menu>
