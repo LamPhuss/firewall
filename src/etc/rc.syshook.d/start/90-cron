@@ -1,6 +1,7 @@
 #!/bin/sh
 
 echo -n "Starting Cron: "
+echo -n "Đang khởi động Cron: "
 configctl cron restart
 
 /usr/local/sbin/configctl -dq syslog archive

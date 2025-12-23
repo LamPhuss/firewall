@@ -151,6 +151,7 @@ function kea_configure_do($verbose = false)
 
     if ($keaDhcpv4->isEnabled() || $keaDhcpv6->isEnabled()) {
         service_log('Sync KEA DHCP config...', $verbose);
+        service_log('Đang đồng bộ cấu hình KEA DHCP...', $verbose);
         if ($keaDhcpv4->isEnabled() && $keaDhcpv4->general->manual_config->isEmpty()) {
             /* skip kea-dhcp4.conf when configured manually */
             $keaDhcpv4->generateConfig();
@@ -172,6 +173,7 @@ function kea_configure_do($verbose = false)
             );
         }
         service_log("done.\n", $verbose);
+        service_log("hoàn tất.\n", $verbose);
     }
 }
 

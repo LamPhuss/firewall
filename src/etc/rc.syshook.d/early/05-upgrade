@@ -5,6 +5,7 @@
 for STAGE in K B P; do
 	if opnsense-update -${STAGE}; then
 		echo "Rebooting now."
+		echo "Đang khởi động lại ngay."
 		reboot
 	fi
 done

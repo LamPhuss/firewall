@@ -81,6 +81,7 @@ function loopback_configure_do($verbose = false, $device = null)
 
     if (!empty($loopbacks)) {
         service_log(sprintf('Configuring Loopback interface%s...', empty($device) ? 's' : " {$device}"), $verbose);
+        service_log(sprintf('Đang cấu hình giao diện Loopback%s...', empty($device) ? '' : " {$device}"), $verbose);
     }
 
     // (re)configure loopback devices
@@ -108,6 +109,7 @@ function loopback_configure_do($verbose = false, $device = null)
 
     if (!empty($loopbacks)) {
         service_log("done.\n", $verbose);
+        service_log("hoàn tất.\n", $verbose);
     }
 }
 

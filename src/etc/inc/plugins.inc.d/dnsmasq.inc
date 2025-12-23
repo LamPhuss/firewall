@@ -175,6 +175,7 @@ function dnsmasq_configure_do($verbose = false)
     }
 
     service_log('Starting Dnsmasq...', $verbose);
+    service_log('Đang khởi động Dnsmasq...', $verbose);
 
     _dnsmasq_add_host_entries();
 
@@ -192,6 +193,7 @@ function dnsmasq_configure_do($verbose = false)
     }
 
     service_log("done.\n", $verbose);
+    service_log("hoàn tất.\n", $verbose);
 }
 
 function _dnsmasq_add_host_entries()
