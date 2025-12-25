@@ -64,7 +64,6 @@
             <General url="/system_general.php">
                 <Edit url="/system_general.php*" visibility="hidden"/>
             </General>
-            <Language VisibleName="Language" url="/system_general.php" cssClass="fa fa-language fa-fw"/>
             <Miscellaneous url="/system_advanced_misc.php" visibility="delete"/>
             <Tunables url="/ui/core/tunables" visibility="delete"/>
         </Settings>
