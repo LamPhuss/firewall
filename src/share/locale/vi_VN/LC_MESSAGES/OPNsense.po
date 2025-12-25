@@ -1,0 +1,222 @@
+# Vietnamese translations for OPNsense
+msgid ""
+msgstr ""
+"Project-Id-Version: OPNsense 25.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-25 00:00+0000\n"
+"PO-Revision-Date: 2025-12-25 00:00+0000\n"
+"Last-Translator: OPNsense Team\n"
+"Language-Team: Vietnamese\n"
+"Language: vi_VN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+# Main Menu
+msgid "Dashboard"
+msgstr "Bảng điều khiển"
+
+msgid "System"
+msgstr "Hệ thống"
+
+msgid "Interfaces"
+msgstr "Giao diện mạng"
+
+msgid "Firewall"
+msgstr "Tường lửa"
+
+msgid "Services"
+msgstr "Dịch vụ"
+
+msgid "VPN"
+msgstr "VPN"
+
+msgid "Lobby"
+msgstr "Sảnh"
+
+msgid "Power"
+msgstr "Nguồn"
+
+msgid "Help"
+msgstr "Trợ giúp"
+
+msgid "Logout"
+msgstr "Đăng xuất"
+
+# Login
+msgid "Login"
+msgstr "Đăng nhập"
+
+msgid "Username"
+msgstr "Tên đăng nhập"
+
+msgid "Password"
+msgstr "Mật khẩu"
+
+msgid "Language"
+msgstr "Ngôn ngữ"
+
+# Common actions
+msgid "Save"
+msgstr "Lưu"
+
+msgid "Apply"
+msgstr "Áp dụng"
+
+msgid "Cancel"
+msgstr "Hủy bỏ"
+
+msgid "Delete"
+msgstr "Xóa"
+
+msgid "Edit"
+msgstr "Sửa"
+
+msgid "Add"
+msgstr "Thêm"
+
+msgid "Close"
+msgstr "Đóng"
+
+msgid "Back"
+msgstr "Quay lại"
+
+msgid "Next"
+msgstr "Tiếp theo"
+
+msgid "Previous"
+msgstr "Trước"
+
+msgid "Submit"
+msgstr "Gửi"
+
+msgid "Reset"
+msgstr "Đặt lại"
+
+msgid "Reload"
+msgstr "Tải lại"
+
+msgid "Refresh"
+msgstr "Làm mới"
+
+# System
+msgid "Settings"
+msgstr "Cài đặt"
+
+msgid "General"
+msgstr "Chung"
+
+msgid "Administration"
+msgstr "Quản trị"
+
+msgid "Logging"
+msgstr "Ghi nhật ký"
+
+msgid "Status"
+msgstr "Trạng thái"
+
+msgid "Configuration"
+msgstr "Cấu hình"
+
+msgid "Backup"
+msgstr "Sao lưu"
+
+msgid "Restore"
+msgstr "Khôi phục"
+
+msgid "Update"
+msgstr "Cập nhật"
+
+msgid "Firmware"
+msgstr "Phần mềm"
+
+msgid "Reboot"
+msgstr "Khởi động lại"
+
+msgid "Halt"
+msgstr "Tắt máy"
+
+# Network
+msgid "Network"
+msgstr "Mạng"
+
+msgid "Address"
+msgstr "Địa chỉ"
+
+msgid "Gateway"
+msgstr "Cổng"
+
+msgid "DNS"
+msgstr "DNS"
+
+msgid "DHCP"
+msgstr "DHCP"
+
+msgid "Routes"
+msgstr "Tuyến đường"
+
+msgid "Alias"
+msgstr "Bí danh"
+
+msgid "Port"
+msgstr "Cổng"
+
+# Firewall
+msgid "Rules"
+msgstr "Quy tắc"
+
+msgid "NAT"
+msgstr "NAT"
+
+msgid "Diagnostics"
+msgstr "Chẩn đoán"
+
+msgid "Aliases"
+msgstr "Bí danh"
+
+msgid "Groups"
+msgstr "Nhóm"
+
+msgid "Schedule"
+msgstr "Lịch trình"
+
+# Messages
+msgid "Success"
+msgstr "Thành công"
+
+msgid "Error"
+msgstr "Lỗi"
+
+msgid "Warning"
+msgstr "Cảnh báo"
+
+msgid "Information"
+msgstr "Thông tin"
+
+msgid "Are you sure?"
+msgstr "Bạn có chắc chắn?"
+
+msgid "Changes have been saved"
+msgstr "Các thay đổi đã được lưu"
+
+msgid "Changes have been applied"
+msgstr "Các thay đổi đã được áp dụng"
+
+msgid "No changes to apply"
+msgstr "Không có thay đổi nào để áp dụng"
+
+msgid "Invalid input"
+msgstr "Dữ liệu đầu vào không hợp lệ"
+
+msgid "Required field"
+msgstr "Trường bắt buộc"
+
+msgid "Please wait..."
+msgstr "Vui lòng đợi..."
+
+msgid "Loading..."
+msgstr "Đang tải..."
+
+msgid "Processing..."
+msgstr "Đang xử lý..."
