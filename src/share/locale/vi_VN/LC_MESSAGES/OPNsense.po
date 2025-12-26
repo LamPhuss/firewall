@@ -17217,7 +17217,7 @@ msgstr "Tàn tật"
 #. File: /usr/lang/src/controllers.php, line: 340
 #: 
 msgid "Disk"
-msgstr "đĩa"
+msgstr "Disk"
 
 #. File: /usr/lang/src/controllers.php, line: 341
 #: 
