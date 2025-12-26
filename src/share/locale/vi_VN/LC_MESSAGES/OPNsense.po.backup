@@ -66610,7 +66610,7 @@ msgstr "Chuyển hướng HTTP sang HTTPS"
 #. File: /usr/lang/src/controllers.php, line: 4393
 #: 
 msgid "Register CARP status monitor. When no neighbors are found, consider this node less attractive. Requires syslog enabled with “Debugging” logging. Incompatible with “Enable CARP Failover”."
-msgstr "Đăng ký giám sát trạng thái CARP. Khi không tìm thấy nút lân cận nào, hãy coi nút này kém hấp dẫn hơn. Yêu cầu bật nhật ký hệ thống khi ghi nhật ký \"Gỡ lỗi\". Không tương thích với \"Bật chuyển đổi dự phòng CARP\"."
+msgstr "Đăng ký giám sát trạng thái CARP. Khi không tìm thấy nút lân cận nào, hãy coi nút này kém hấp dẫn hơn. Yêu cầu bật nhật ký hệ thống khi ghi nhật ký "Gỡ lỗi". Không tương thích với "Bật chuyển đổi dự phòng CARP"."
 
 #. File: /usr/lang/src/controllers.php, line: 4397
 #: 
