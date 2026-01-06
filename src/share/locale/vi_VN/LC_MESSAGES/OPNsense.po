@@ -20390,7 +20390,7 @@ msgstr "Kích thước tải lên tối đa (kB)"
 #. File: /usr/lang/src/controllers.php, line: 963
 #: 
 msgid "Memory"
-msgstr "Ký ức"
+msgstr "Memory"
 
 #. File: /usr/lang/src/controllers.php, line: 964
 #: 
