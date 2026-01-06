@@ -12256,7 +12256,7 @@ msgstr "Để áp dụng các cài đặt này, bản cập nhật chương trì
 #. File: /usr/core/src/www/widgets/widgets/thermal_sensors.widget.php, line: 146
 #: 
 msgid "Save"
-msgstr "Cứu"
+msgstr "Lưu"
 
 #. File: /usr/core/src/opnsense/mvc/app/views/OPNsense/Core/firmware.volt, line: 840
 #: 
@@ -19884,7 +19884,7 @@ msgstr "Nghe địa chỉ"
 #. File: /usr/lang/src/controllers.php, line: 861
 #: 
 msgid "Listen End Port"
-msgstr "Nghe Port cuối"
+msgstr "Nghe End Port"
 
 #. File: /usr/lang/src/controllers.php, line: 862
 #: 
