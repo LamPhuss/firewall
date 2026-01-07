@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $savemsg = gettext('Your password does not match the selected security policies. Please provide a new one.');
     }
 
-    $pconfig['language'] = $userFound ? $config['system']['user'][$userindex[$username]]['language'] ?? '' : null;
+    // TODO: delete $pconfig['language'] = $userFound ? $config['system']['user'][$userindex[$username]]['language'] ?? '' : null;
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input_errors = array();
     $pconfig = $_POST;
@@ -105,11 +105,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
 
         if (count($input_errors) == 0) {
-            if (!empty($pconfig['language'])) {
-                $config['system']['user'][$userindex[$username]]['language'] = $pconfig['language'];
-            } elseif (isset($config['system']['user'][$userindex[$username]]['language'])) {
-                unset($config['system']['user'][$userindex[$username]]['language']);
-            }
+            // TODO: delete if (!empty($pconfig['language'])) {
+            //     $config['system']['user'][$userindex[$username]]['language'] = $pconfig['language'];
+            // } elseif (isset($config['system']['user'][$userindex[$username]]['language'])) {
+            //     unset($config['system']['user'][$userindex[$username]]['language']);
+            // }
 
             // only update password change date if there is a policy constraint
             if (!empty($config['system']['webgui']['enable_password_policy_constraints']) &&
@@ -198,10 +198,10 @@ $( document ).ready(function() {
                 <table class="table table-striped">
                   <tr>
                     <td style="width:22%"><strong><?= gettext('User Settings') ?></strong></td>
-                    <td style="width:78%; text-align:right">
+                    <!-- <td style="width:78%; text-align:right">
                       <small><?=gettext("full help"); ?> </small>
                       <i class="fa fa-toggle-off text-danger"  style="cursor: pointer;" id="show_all_help_page"></i>
-                    </td>
+                    </td> -->
                   </tr>
                   <tr>
                     <td><i class="fa fa-info-circle text-muted"></i> <?=gettext("Old password"); ?></td>
@@ -221,7 +221,7 @@ $( document ).ready(function() {
                       <input name="passwordfld2" type="password" autocomplete="new-password" id="passwordfld2" size="20" />
                     </td>
                   </tr>
-                  <tr>
+                  <!-- TODO: delete <tr>
                     <td><a id="help_for_language" href="#" class="showhelp"><i class="fa fa-info-circle"></i></a> <?=gettext("Language");?></td>
                     <td>
                       <select name="language" class="selectpicker" data-style="btn-default" data-dropup-auto="true" data-size="10">
@@ -234,7 +234,7 @@ $( document ).ready(function() {
                         <?= gettext('Choose a language for the web GUI.') ?>
                       </div>
                     </td>
-                  </tr>
+                  </tr> -->
                   <tr>
                     <td>&nbsp;</td>
                     <td>

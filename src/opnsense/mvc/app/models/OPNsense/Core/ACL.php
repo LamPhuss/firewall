@@ -440,9 +440,61 @@ class ACL
      */
     public function getPrivList()
     {
+        // TODO: modified code
+        $hiddenPrivileges = [
+            'page-diagnostics-arptable',
+            'page-diagnostics-authentication',
+            'page-diagnostics-backup-restore',
+            'page-diagnostics-configurationhistory',
+            'page-filter-api',
+            'page-filter-snat-api',
+            'page-firewall-nat-npt',
+            'page-firewall-categories',
+            'page-interfaces-groups-edit',
+            'page-firewall-scrub',
+            'page-firewall-schedules',
+            'page-firewall-schedules-edit',
+            'page-firewall-trafficshaper',
+            'page-interfaces-bridge-edit',
+            'page-interfaces-gif-edit',
+            'page-interfaces-gre-edit',
+            'page-interfaces-lagg-edit',
+            'page-interfaces-loopback',
+            'page-interfaces-neighbor',
+            'page-interfaces-ppps',
+            'page-interfaces-ppps-edit',
+            'page-firewall-virtualipaddress-edit',
+            'page-status-carp',
+            'page-interfaces-vxlan',
+            'page-interfaces-wireless',
+            'page-interfaces-wireless-edit',
+            'page-system-license',
+            'page-status-trafficgraph',
+            'page-services-captiveportal',
+            'page-services-dhcpserver',
+            'page-services-dhcpserver-editstaticmapping',
+            'page-dhcp-kea-ctrl-agent'
+        ];
+
+        $excludePatterns = [
+            'page-diagnostics-*',
+        ];
+
         // convert json priv map to array
         $priv_list = [];
         foreach ($this->ACLtags as $aclKey => $aclItem) {
+            foreach ($excludePatterns as $pattern) {
+                if (fnmatch($pattern, $aclKey)) {
+                    // "continue 2" breaks the inner pattern loop 
+                    // AND skips the current iteration of the main ACLtags loop
+                    continue 2; 
+                }
+            }
+
+            if (in_array($aclKey, $hiddenPrivileges)) {
+                continue;
+            }
+
             $priv_list[$aclKey] = [];
             foreach ($aclItem as $propName => $propValue) {
                 if ($propName == 'name') {

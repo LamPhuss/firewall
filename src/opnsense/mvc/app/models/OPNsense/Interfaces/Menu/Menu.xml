@@ -5,7 +5,7 @@
             <Bridge url="/ui/interfaces/bridge" visibility="delete"/>
             <GIF url="/ui/interfaces/gif" visibility="delete"/>
             <GRE url="/ui/interfaces/gre" visibility="delete"/>
-            <LAGG url="/ui/interfaces/lagg"/>
+            <LAGG url="/ui/interfaces/lagg" visibility="delete"/>
             <Loopback url="/ui/interfaces/loopback" visibility="delete"/>
             <PPP VisibleName="Point-to-Point" url="/interfaces_ppps.php" visibility="delete">
                 <Edit url="/interfaces_ppps_edit.php*" visibility="hidden"/>
@@ -15,8 +15,8 @@
         </Devices>
         <Neighbors order="220" url="/ui/interfaces/neighbor" cssClass="fa fa-users fa-fw" visibility="delete"/>
         <Overview order="230" url="/ui/interfaces/overview" cssClass="fa fa-tasks fa-fw"/>
-        <Settings order="240" url="/system_advanced_network.php" cssClass="fa fa-cogs fa-fw">
-            <Status order="10" url="/ui/diagnostics/interface/status"/>
+        <Settings order="240" url="/system_advanced_network.php" cssClass="fa fa-cogs fa-fw" visibility="delete">
+            <Status order="10" url="/ui/diagnostics/interface/status" visibility="delete"/>
         </Settings>
         <VIP order="250" VisibleName="Virtual IPs" cssClass="fa fa-clone fa-fw" visibility="delete">
             <Settings url="/ui/interfaces/vip"/>
