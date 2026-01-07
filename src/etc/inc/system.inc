@@ -277,7 +277,8 @@ function get_locale_list()
 
     if (!product::getInstance()->development()) {
         /* below 30% progress or currently unvetted */
-        unset($locales['vi_VN']);
+        // Enable Vietnamese locale for testing
+        // unset($locales['vi_VN']);
     }
 
     return $locales;
