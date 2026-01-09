@@ -1,1 +1,0 @@
-rm -rf /usr/local/opnsense/mvc/app/cache/*
