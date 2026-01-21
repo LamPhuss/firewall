@@ -1,7 +1,7 @@
 <menu>
     <VPN>
-        <IPsec cssClass="fa fa-lock fa-fw" visibility="delete">
-            <Connections order="5" url="/ui/ipsec/connections"/>
+        <IPsec cssClass="fa fa-lock fa-fw" visibility="hidden">
+            <Connections order="5" VisibleName="Connections" url="/ui/ipsec/connections"/>
             <Keys order="30" VisibleName="Pre-Shared Keys" url="/ui/ipsec/pre_shared_keys"/>
             <KeyPairs order="40" VisibleName="Key Pairs" url="/ui/ipsec/key_pairs" />
             <Settings order="50" VisibleName="Mobile &amp; Advanced Settings" url="/ui/ipsec/connections/settings"/>

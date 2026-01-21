@@ -25,8 +25,8 @@
  # POSSIBILITY OF SUCH DAMAGE.
  #}
 
- <script>
-    $( document ).ready(function() {
+<script>
+    $(document).ready(function() {
         const data_get_map = {'frm_general_settings':"/api/wireguard/general/get"};
         mapDataToFormUI(data_get_map).done(function(data){
             formatTokenizersUI();
@@ -34,22 +34,23 @@
         });
 
         const grid_peers = $("#{{formGridWireguardClient['table_id']}}").UIBootgrid({
-                search: '/api/wireguard/client/search_client',
-                get: '/api/wireguard/client/get_client/',
-                set: '/api/wireguard/client/set_client/',
-                add: '/api/wireguard/client/add_client/',
-                del: '/api/wireguard/client/del_client/',
-                toggle: '/api/wireguard/client/toggle_client/',
-                options:{
-                    initialSearchPhrase: getUrlHash('search'),
-                    requestHandler: function(request){
-                        if ( $('#server_filter').val().length > 0) {
-                            request['servers'] = $('#server_filter').val();
-                        }
-                        return request;
+            search: '/api/wireguard/client/search_client',
+            get: '/api/wireguard/client/get_client/',
+            set: '/api/wireguard/client/set_client/',
+            add: '/api/wireguard/client/add_client/',
+            del: '/api/wireguard/client/del_client/',
+            toggle: '/api/wireguard/client/toggle_client/',
+            options:{
+                initialSearchPhrase: getUrlHash('search'),
+                requestHandler: function(request){
+                    if ($('#server_filter').val().length > 0) {
+                        request['servers'] = $('#server_filter').val();
                     }
+                    return request;
+                }
             }
         });
+        
         grid_peers.on("loaded.rs.jquery.bootgrid", function (e){
             // reload servers before grid load
             if ($("#server_filter > option").length == 0) {
@@ -65,7 +66,7 @@
             }
         });
 
-        $("#{{formGridWireguardServer['table_id']}}").UIBootgrid({
+        const grid_instances = $("#{{formGridWireguardServer['table_id']}}").UIBootgrid({
             search: '/api/wireguard/server/search_server',
             get: '/api/wireguard/server/get_server/',
             set: '/api/wireguard/server/set_server/',
@@ -73,6 +74,190 @@
             del: '/api/wireguard/server/del_server/',
             toggle: '/api/wireguard/server/toggle_server/'
         });
+
+        // ... (phần code trước vẫn giữ nguyên)
+
+        grid_instances.on("loaded.rs.jquery.bootgrid", function () {
+            const dlgSel = '#{{formGridWireguardServer["edit_dialog_id"]}}';
+
+            // IMPORTANT: tránh bind lặp khi grid reload
+            $(dlgSel).off('shown.bs.modal.wg_autofill').on('shown.bs.modal.wg_autofill', function (e) {
+                // Ẩn các trường không cần thiết
+                $("tr[id='row_server\\.carp_depend_on']").hide();
+                $("tr[id='row_server\\.disableroutes']").hide();
+
+                // ====== Helper: sync tunnel address theo instance ======
+                function syncTunnelAddress(instanceId, overwrite = false) {
+                    const idNum = parseInt(instanceId, 10);
+                    const $tunnelSelect = $("#server\\.tunneladdress");
+                    let currentValue = $tunnelSelect.val();
+                    
+                    // Nếu là select, currentValue có thể là mảng, chuyển thành string để so sánh
+                    if (Array.isArray(currentValue)) {
+                        currentValue = currentValue.join(',');
+                    }
+
+                    if (Number.isFinite(idNum) && idNum >= 1 && idNum <= 254) {
+                        const autoAddr = '10.' + idNum + '.0.1/24';
+                        if (overwrite || !currentValue || currentValue === '') {
+                            if ($tunnelSelect.is('select')) {
+                                $tunnelSelect.val([autoAddr]);
+                            } else {
+                                $tunnelSelect.val(autoAddr);
+                            }
+                            $tunnelSelect.trigger('change');
+                            $tunnelSelect.attr('title', 'Địa chỉ mặc định: ' + autoAddr + '. Bạn có thể thêm, xóa hoặc sửa.');
+                        }
+                    } else {
+                        if (overwrite || !currentValue || currentValue === '') {
+                            $tunnelSelect.val(null).trigger('change');
+                            $tunnelSelect.attr('title', 'Nhập một hoặc nhiều địa chỉ mạng theo CIDR, ví dụ: 10.10.10.1/24');
+                        }
+                    }
+                    
+                    // Format lại tokenizer
+                    if (typeof formatTokenizersUI === 'function') {
+                        setTimeout(function() {
+                            formatTokenizersUI();
+                        }, 50);
+                    }
+                }
+
+                // Xử lý khi instance ID thay đổi
+                $("#server\\.instance")
+                .off("change.wg_autotunnel")
+                .on("change.wg_autotunnel", function () {
+                    const idNum = parseInt($(this).val(), 10);
+
+                    // remove old feedback
+                    const oldFeedback = $(this).closest('.form-group').find('.invalid-feedback');
+                    oldFeedback.remove();
+                    $(this).removeClass('is-invalid');
+
+                    // warning when outside 1..254 (not hard error)
+                    if (!Number.isFinite(idNum) || idNum < 1 || idNum > 254) {
+                        $('<div class="invalid-feedback" style="display:block">Instance ID từ 1-254 sẽ tự động sinh tunnel address. Ngoài phạm vi này bạn cần tự nhập Tunnel address.</div>')
+                            .insertAfter($(this));
+                        $(this).addClass('is-invalid');
+                    }
+
+                    // always sync tunnel address (rule: 1..254 auto, >254 blank)
+                    syncTunnelAddress($(this).val(), true);
+                });
+
+                // Kiểm tra Add hay Edit
+                const isNewRecord = $("#server\\.instance").val() === '';
+
+                if (isNewRecord) {
+                    // ===== Add mới: tự động sinh tất cả =====
+                    
+                    // Gọi API getNewInstanceDefaults để lấy tất cả giá trị mặc định
+                    ajaxGet("/api/wireguard/general/getNewInstanceDefaults", {}, function (defaults) {
+                        if (defaults.instance !== undefined) {
+                            const instanceId = defaults.instance;
+                            
+                            // Điền instance ID
+                            $("#server\\.instance").val(instanceId);
+                            
+                            // Điền tunnel address (nếu có) - XỬ LÝ CHO SELECT2/TOKENIZER
+                            // Điền tunnel address (nếu có)
+                        if (defaults.tunneladdress) {
+                            const tunnelAddr = defaults.tunneladdress;
+                            const $tunnelSelect = $("#server\\.tunneladdress");
+                            
+                            // Thử cả hai cách: nếu là select thì dùng mảng, nếu là input thì dùng chuỗi
+                            if ($tunnelSelect.is('select')) {
+                                $tunnelSelect.val([tunnelAddr]);
+                            } else {
+                                $tunnelSelect.val(tunnelAddr);
+                            }
+                            $tunnelSelect.trigger('change');
+                            
+                            // Cập nhật tooltip
+                            $tunnelSelect.attr('title', 'Địa chỉ mặc định: ' + tunnelAddr + '. Bạn có thể thêm, xóa hoặc sửa.');
+                        }
+                            
+                            // Điền name (nếu trống)
+                            if (defaults.name && !$("#server\\.name").val()) {
+                                $("#server\\.name").val(defaults.name);
+                            }
+                            
+                            // Điền port (nếu trống)
+                            if (defaults.port && !$("#server\\.port").val()) {
+                                $("#server\\.port").val(defaults.port);
+                            }
+                            
+                            // Kích hoạt sự kiện change để validate
+                            $("#server\\.instance").trigger('change.wg_autotunnel');
+                            
+                            // Format lại tokenizers nếu có
+                            if (typeof formatTokenizersUI === 'function') {
+                                setTimeout(function() {
+                                    formatTokenizersUI();
+                                }, 100);
+                            }
+                        }
+                    });
+
+                    // Tạo keypair mới
+                    ajaxGet("/api/wireguard/general/generateKeypair", {}, function (data) {
+                        if (data.pubkey && data.privkey) {
+                            $("#server\\.pubkey").val(data.pubkey);
+                            $("#server\\.privkey").val(data.privkey);
+                        }
+                    });
+
+                } else {
+                    // ===== Edit: chỉ sinh field còn thiếu =====
+                    const instanceId = $("#server\\.instance").val();
+
+                    // Kích hoạt sync tunnel address dựa trên instance hiện tại
+                    if (instanceId) {
+                        syncTunnelAddress(instanceId, false);
+                        $("#server\\.instance").trigger('change.wg_autotunnel');
+                    }
+
+                    // Name nếu trống
+                    if (!$("#server\\.name").val() && instanceId) {
+                        ajaxGet("/api/wireguard/general/generateInstanceName/" + instanceId, {}, function (data) {
+                            if (data.name) {
+                                $("#server\\.name").val(data.name);
+                            }
+                        });
+                    }
+
+                    // Listen port nếu trống
+                    if (!$("#server\\.port").val()) {
+                        ajaxGet("/api/wireguard/general/getNextListenPort", {}, function (data) {
+                            if (data.port) {
+                                $("#server\\.port").val(data.port);
+                            }
+                        });
+                    }
+
+                    // keypair nếu trống
+                    if ((!$("#server\\.pubkey").val() || !$("#server\\.privkey").val()) && 
+                        confirm("Bạn chưa có keypair. Bạn có muốn tạo keypair mới không?")) {
+                        ajaxGet("/api/wireguard/general/generateKeypair", {}, function (data) {
+                            if (data.pubkey && data.privkey) {
+                                $("#server\\.pubkey").val(data.pubkey);
+                                $("#server\\.privkey").val(data.privkey);
+                            }
+                        });
+                    }
+                }
+                
+                // Format lại tokenizers sau khi tất cả đã load xong
+                setTimeout(function() {
+                    if (typeof formatTokenizersUI === 'function') {
+                        formatTokenizersUI();
+                    }
+                    $('.selectpicker').selectpicker('refresh');
+                }, 200);
+            });
+        });
+
+// ... (phần code sau vẫn giữ nguyên)
 
         $("#reconfigureAct").SimpleActionButton({
             onPreAction: function() {
@@ -89,13 +274,14 @@
          */
         $("#control_label_server\\.pubkey").append($("#keygen_div").detach().show());
         $("#keygen").click(function(){
-            ajaxGet("/api/wireguard/server/key_pair", {}, function(data, status){
-                if (data.status && data.status === 'ok') {
+            ajaxGet("/api/wireguard/general/generateKeypair", {}, function(data, status){
+                if (data.pubkey && data.privkey) {
                     $("#server\\.pubkey").val(data.pubkey);
                     $("#server\\.privkey").val(data.privkey);
                 }
             });
-        })
+        });
+        
         $("#control_label_client\\.psk").append($("#pskgen_div").detach().show());
         $("#pskgen").click(function(){
             ajaxGet("/api/wireguard/client/psk", {}, function(data, status){
@@ -103,7 +289,7 @@
                     $("#client\\.psk").val(data.psk);
                 }
             });
-        })
+        });
 
         /**
          * Quick instance filter on top
@@ -123,7 +309,26 @@
                     $("#configbuilder\\.psk").val(data.psk).change();
                 }
             });
-        })
+        });
+        
+        // Thêm nút Download config bên cạnh QR code
+        let downloadBtn = $('<button id="download_config" type="button" class="btn btn-primary" style="margin-left:10px" title="Download WireGuard config"><i class="fa fa-fw fa-download"></i> Download Config</button>');
+        $("#control_label_configbuilder\\.output").append(downloadBtn);
+        
+        $("#download_config").click(function(){
+            let config = $("#configbuilder\\.output").val();
+            let peerName = $("#configbuilder\\.name").val() || 'wireguard-peer';
+            let blob = new Blob([config], {type: 'text/plain'});
+            let url = window.URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = peerName + '.conf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        });
+        
         let tmp = $("#configbuilder\\.output").closest('tr');
         tmp.find('td:eq(2)').empty().append($("<div id='qrcode'/>"));
         $("#configbuilder\\.output").css('max-width', '100%');
@@ -135,19 +340,27 @@
         $("#configbuilder\\.servers").change(function(){
             ajaxGet('/api/wireguard/client/get_server_info/' + $(this).val(), {}, function(data, status) {
                 if (data.status === 'ok') {
-                    let endpoint = $("#configbuilder\\.endpoint");
                     let peer_dns = $("#configbuilder\\.peer_dns");
                     $("#configbuilder\\.address").val(data.address);
+                    
+                    // Cập nhật DNS servers
                     peer_dns
                         .val(data.peer_dns)
                         .data('org-value', data.peer_dns);
 
-                    endpoint
-                        .val(data.endpoint)
-                        .data('org-value', data.endpoint)
-                        .data('mtu', data.mtu)
-                        .data('pubkey', data.pubkey)
-                        .change();
+                    // Tách endpoint thành IP và port
+                    if (data.endpoint) {
+                        let parts = data.endpoint.split(':');
+                        let endpointIp = parts[0] || '';
+                        let endpointPort = parts[1] || '51820';
+                        
+                        $("#configbuilder\\.endpoint_ip").val(endpointIp).data('org-value', endpointIp);
+                        $("#configbuilder\\.endpoint_port").val(endpointPort);
+                    }
+                    
+                    // Lưu MTU và pubkey
+                    $("#configbuilder\\.endpoint_ip").data('mtu', data.mtu).data('pubkey', data.pubkey);
+                    $("#configbuilder\\.endpoint_ip").change();
                 }
             });
         });
@@ -156,8 +369,11 @@
 
         $("#btn_configbuilder_save").click(function(){
             let instance_id = $("#configbuilder\\.servers").val();
-            let endpoint = $("#configbuilder\\.endpoint");
+            let endpointIp = $("#configbuilder\\.endpoint_ip").val();
+            let endpointPort = $("#configbuilder\\.endpoint_port").val() || '51820';
+            let endpoint = endpointIp + ':' + endpointPort;
             let peer_dns = $("#configbuilder\\.peer_dns");
+            
             let peer = {
                 configbuilder: {
                     enabled: '1',
@@ -167,7 +383,7 @@
                     tunneladdress: $("#configbuilder\\.address").val(),
                     keepalive: $("#configbuilder\\.keepalive").val(),
                     server: instance_id,
-                    endpoint: endpoint.val()
+                    endpoint: endpoint
                 }
             };
             ajaxCall('/api/wireguard/client/add_client_builder', peer, function(data, status) {
@@ -182,10 +398,10 @@
                     }
                     handleFormValidation("frm_config_builder", data.validations);
                 } else {
-                    if (endpoint.val() != endpoint.data('org-value') || peer_dns.val() != peer_dns.data('org-value')) {
+                    if (endpointIp != $("#configbuilder\\.endpoint_ip").data('org-value') || peer_dns.val() != peer_dns.data('org-value')) {
                         let param = {
                             'server': {
-                                'endpoint': endpoint.val(),
+                                'endpoint': endpoint,
                                 'peer_dns': peer_dns.val()
                             }
                         };
@@ -198,27 +414,83 @@
                 }
             });
         });
+        
         $('input[id ^= "configbuilder\\."]').change(configbuilder_update_config);
         $('select[id ^= "configbuilder\\."]').change(configbuilder_update_config);
 
-        function configbuilder_new()
-        {
+        function configbuilder_new() {
             mapDataToFormUI({'frm_config_builder':"/api/wireguard/client/get_client_builder"}).done(function(data){
-                    formatTokenizersUI();
-                    $('.selectpicker').selectpicker('refresh');
-                    ajaxGet("/api/wireguard/server/key_pair", {}, function(data, status){
+                formatTokenizersUI();
+                $('.selectpicker').selectpicker('refresh');
+                
+                // Tự động sinh keypair
+                ajaxGet("/api/wireguard/server/key_pair", {}, function(data, status){
                     if (data.status && data.status === 'ok') {
-                            $("#configbuilder\\.pubkey").val(data.pubkey);
-                            $("#configbuilder\\.privkey").val(data.privkey).change();
-                        }
-                    });
-                    $("#configbuilder\\.tunneladdress").val("0.0.0.0/0,::/0");
-                    clearFormValidation("frm_config_builder");
+                        $("#configbuilder\\.pubkey").val(data.pubkey);
+                        $("#configbuilder\\.privkey").val(data.privkey).change();
+                    }
                 });
+                
+                // Tự động điền hostname vào Name
+                ajaxGet("/api/wireguard/general/generateInstanceName/0", {}, function(data) {
+                    if (data.name) {
+                        let hostname = data.name.split('_VPN_')[0];
+                        $("#configbuilder\\.name").val(hostname);
+                    }
+                });
+                
+                // Set mặc định Keepalive = 3
+                $("#configbuilder\\.keepalive").val("3");
+                
+                // Set mặc định Endpoint port = 51820
+                $("#configbuilder\\.endpoint_port").val("51820");
+                
+                // Mặc định Allowed IPs
+                $("#configbuilder\\.tunneladdress").val("0.0.0.0/0,::/0");
+                
+                // Load danh sách IPs của firewall cho Endpoint IP dropdown
+                ajaxGet("/api/wireguard/general/getFirewallIps", {}, function(data) {
+                    if (data.ips) {
+                        let select = $("#configbuilder\\.endpoint_ip");
+                        select.empty();
+                        data.ips.forEach(function(ip) {
+                            select.append($('<option></option>').val(ip.value).text(ip.label));
+                        });
+                        select.selectpicker('refresh');
+                    }
+                });
+                
+                // Load danh sách DNS servers cho DNS dropdown
+                ajaxGet("/api/wireguard/general/getCommonDns", {}, function(data) {
+                    if (data.dns) {
+                        let select = $("#configbuilder\\.peer_dns");
+                        select.empty();
+                        data.dns.forEach(function(dns) {
+                            select.append($('<option></option>').val(dns.value).text(dns.label));
+                        });
+                        select.selectpicker('refresh');
+                    }
+                });
+                
+                // Load danh sách IPs cho Allowed IPs dropdown
+                ajaxGet("/api/wireguard/general/getFirewallIps", {}, function(data) {
+                    if (data.ips) {
+                        let select = $("#configbuilder\\.tunneladdress");
+                        select.empty();
+                        // Thêm option mặc định
+                        select.append($('<option></option>').val("0.0.0.0/0,::/0").text("All traffic (0.0.0.0/0, ::/0)"));
+                        data.ips.forEach(function(ip) {
+                            select.append($('<option></option>').val(ip.value).text(ip.label));
+                        });
+                        select.selectpicker('refresh');
+                    }
+                });
+                
+                clearFormValidation("frm_config_builder");
+            });
         }
 
-        function configbuilder_update_config()
-        {
+        function configbuilder_update_config() {
             let rows = [];
             rows.push('[Interface]');
             rows.push('PrivateKey = ' + $("#configbuilder\\.privkey").val());
@@ -228,16 +500,23 @@
             if ($("#configbuilder\\.peer_dns").val()) {
                 rows.push('DNS = ' + $("#configbuilder\\.peer_dns").val());
             }
-            if ($("#configbuilder\\.endpoint").data('mtu')) {
-                rows.push('MTU = ' + $("#configbuilder\\.endpoint").data('mtu'));
+            if ($("#configbuilder\\.endpoint_ip").data('mtu')) {
+                rows.push('MTU = ' + $("#configbuilder\\.endpoint_ip").data('mtu'));
             }
             rows.push('');
             rows.push('[Peer]');
-            rows.push('PublicKey = ' + $("#configbuilder\\.endpoint").data('pubkey'));
+            rows.push('PublicKey = ' + $("#configbuilder\\.endpoint_ip").data('pubkey'));
             if ($("#configbuilder\\.psk").val()) {
                 rows.push('PresharedKey = ' + $("#configbuilder\\.psk").val());
             }
-            rows.push('Endpoint = ' + $("#configbuilder\\.endpoint").val());
+            
+            // Ghép endpoint từ IP và port
+            let endpointIp = $("#configbuilder\\.endpoint_ip").val();
+            let endpointPort = $("#configbuilder\\.endpoint_port").val() || '51820';
+            if (endpointIp) {
+                rows.push('Endpoint = ' + endpointIp + ':' + endpointPort);
+            }
+            
             rows.push('AllowedIPs = ' + $("#configbuilder\\.tunneladdress").val());
             if ($("#configbuilder\\.keepalive").val()) {
                 rows.push('PersistentKeepalive = ' + $("#configbuilder\\.keepalive").val());
@@ -285,7 +564,7 @@
         <div class="hidden">
             <!-- filter per server container -->
             <div id="filter_container" class="btn-group">
-                <select id="server_filter"  data-title="{{ lang._('Instances') }}" class="selectpicker" data-live-search="true" data-size="5"  multiple data-width="200px">
+                <select id="server_filter" data-title="{{ lang._('Instances') }}" class="selectpicker" data-live-search="true" data-size="5" multiple data-width="200px">
                 </select>
             </div>
         </div>

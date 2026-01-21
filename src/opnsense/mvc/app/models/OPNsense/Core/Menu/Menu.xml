@@ -137,7 +137,7 @@
         <RouterAdv VisibleName="Router Advertisements" cssClass="fa fa-bullseye fa-fw" visibility="delete" />
     </Services>
     <VPN order="50" cssClass="fa fa-globe">
-        <OpenVPN cssClass="fa fa-lock fa-fw" visibility="delete">
+        <OpenVPN cssClass="fa fa-lock fa-fw">
             <Instances order="10" url="/ui/openvpn/instances"/>
             <!-- XXX order gap for client/server legacy pages -->
             <CSC order="30" VisibleName="Client Specific Overrides" url="/ui/openvpn/client_overwrites"/>
