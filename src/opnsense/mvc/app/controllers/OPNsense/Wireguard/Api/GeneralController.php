@@ -191,11 +191,22 @@ class GeneralController extends ApiMutableModelControllerBase
         $result['instance'] = $instanceId;
         
         // Generate tunnel address for this instance
+        $tunnelAddressStr = '';
         if ($instanceId >= 1 && $instanceId <= 254) {
             $tunnelAddress = $this->generateTunnelAddressAction($instanceId);
-            $result['tunneladdress'] = $tunnelAddress['address'];
+            $tunnelAddressStr = $tunnelAddress['address'];
+        }
+        
+        // Format tunnel address theo structure của framework (giống API get_server)
+        if (!empty($tunnelAddressStr)) {
+            $result['tunneladdress'] = [
+                $tunnelAddressStr => [
+                    'value' => $tunnelAddressStr,
+                    'selected' => 1
+                ]
+            ];
         } else {
-            $result['tunneladdress'] = '';
+            $result['tunneladdress'] = [];
         }
         
         // Generate default instance name

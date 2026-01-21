@@ -80,11 +80,70 @@
         grid_instances.on("loaded.rs.jquery.bootgrid", function () {
             const dlgSel = '#{{formGridWireguardServer["edit_dialog_id"]}}';
 
+            // Reset form khi đóng dialog
+            $(dlgSel).off('hidden.bs.modal.wg_reset').on('hidden.bs.modal.wg_reset', function (e) {
+                // Clear instance field để detect Add mode đúng lần sau
+                $("#server\\.instance").val('');
+                console.log("Dialog closed - reset instance field");
+            });
+
             // IMPORTANT: tránh bind lặp khi grid reload
             $(dlgSel).off('shown.bs.modal.wg_autofill').on('shown.bs.modal.wg_autofill', function (e) {
+                console.log("Dialog opened");
+                
                 // Ẩn các trường không cần thiết
                 $("tr[id='row_server\\.carp_depend_on']").hide();
                 $("tr[id='row_server\\.disableroutes']").hide();
+                
+                // ====== CRITICAL: Kiểm tra Add/Edit mode và cleanup NGAY ======
+                const isNewRecord = $("#server\\.instance").val() === '';
+                
+                if (isNewRecord) {
+                    // Add mode: Clear tunnel address field và token tags từ lần trước
+                    const $tunnelField = $("#server\\.tunneladdress");
+                    $tunnelField.empty(); // Clear all old options
+                    
+                    // Clear token tags từ lần trước
+                    const $tokenizerWidget = $tunnelField.parent().find('.tokenize');
+                    if ($tokenizerWidget.length) {
+                        const $container = $tokenizerWidget.find('.tokens-container');
+                        // Remove all existing tokens except search box
+                        $container.find('.token:not(.token-search)').remove();
+                    }
+                    console.log("Cleared old tunnel address data for Add mode");
+                }
+                
+                // ====== CRITICAL: Debug và force refresh tokenizer ======
+                // Kiểm tra ngay lập tức xem field có data không
+                setTimeout(function() {
+                    const $tunnelField = $("#server\\.tunneladdress");
+                    console.log("=== TUNNEL ADDRESS DEBUG ===");
+                    console.log("Field element:", $tunnelField);
+                    console.log("Field exists:", $tunnelField.length > 0);
+                    console.log("Field val():", $tunnelField.val());
+                    console.log("Field data('data-value'):", $tunnelField.data('data-value'));
+                    console.log("Field attr('value'):", $tunnelField.attr('value'));
+                    console.log("Field parent HTML:", $tunnelField.parent().html());
+                    console.log("=== END DEBUG ===");
+                }, 50);
+                
+                // ====== Force refresh tokenizer sau khi dialog mở ======
+                // Framework đã map data, nhưng tokenizer cần được trigger để hiển thị
+                setTimeout(function() {
+                    const $tunnelField = $("#server\\.tunneladdress");
+                    const currentVal = $tunnelField.val();
+                    console.log("Force refresh tokenizer (100ms) - Current value:", currentVal);
+                    
+                    if (currentVal && currentVal.length > 0) {
+                        // Trigger change để tokenizer cập nhật UI
+                        $tunnelField.trigger('change');
+                        
+                        // Force formatTokenizersUI
+                        if (typeof formatTokenizersUI === 'function') {
+                            formatTokenizersUI();
+                        }
+                    }
+                }, 100);
 
                 // ====== Helper: sync tunnel address theo instance ======
                 function syncTunnelAddress(instanceId, overwrite = false) {
@@ -92,27 +151,30 @@
                     const $tunnelSelect = $("#server\\.tunneladdress");
                     let currentValue = $tunnelSelect.val();
                     
-                    // Nếu là select, currentValue có thể là mảng, chuyển thành string để so sánh
+                    // Kiểm tra xem field có giá trị hay không (xử lý cả array và string)
+                    let isEmpty = false;
                     if (Array.isArray(currentValue)) {
-                        currentValue = currentValue.join(',');
+                        isEmpty = currentValue.length === 0 || currentValue.every(v => !v || v.trim() === '');
+                    } else {
+                        isEmpty = !currentValue || currentValue.trim() === '';
                     }
 
+                    // Chỉ tự động điền nếu Instance ID từ 1-254
                     if (Number.isFinite(idNum) && idNum >= 1 && idNum <= 254) {
                         const autoAddr = '10.' + idNum + '.0.1/24';
-                        if (overwrite || !currentValue || currentValue === '') {
-                            if ($tunnelSelect.is('select')) {
-                                $tunnelSelect.val([autoAddr]);
-                            } else {
-                                $tunnelSelect.val(autoAddr);
-                            }
+                        if (overwrite || isEmpty) {
+                            // Đối với tokenizer, luôn set giá trị dạng mảng
+                            $tunnelSelect.val([autoAddr]);
                             $tunnelSelect.trigger('change');
-                            $tunnelSelect.attr('title', 'Địa chỉ mặc định: ' + autoAddr + '. Bạn có thể thêm, xóa hoặc sửa.');
+                            $tunnelSelect.attr('title', 'Địa chỉ mặc định: ' + autoAddr + '. Bạn có thể thêm, xóa hoặc sửa địa chỉ.');
                         }
                     } else {
-                        if (overwrite || !currentValue || currentValue === '') {
-                            $tunnelSelect.val(null).trigger('change');
-                            $tunnelSelect.attr('title', 'Nhập một hoặc nhiều địa chỉ mạng theo CIDR, ví dụ: 10.10.10.1/24');
+                        // Instance ID > 254 hoặc không hợp lệ: xóa giá trị tự động, để người dùng tự điền
+                        if (overwrite) {
+                            $tunnelSelect.val([]);
+                            $tunnelSelect.trigger('change');
                         }
+                        $tunnelSelect.attr('title', 'Instance ID > 254: vui lòng nhập thủ công một hoặc nhiều địa chỉ mạng theo CIDR (ví dụ: 10.10.10.1/24). Nhấn Enter sau mỗi địa chỉ.');
                     }
                     
                     // Format lại tokenizer
@@ -134,8 +196,9 @@
                     oldFeedback.remove();
                     $(this).removeClass('is-invalid');
 
-                    // warning when outside 1..254 (not hard error)
-                    if (!Number.isFinite(idNum) || idNum < 1 || idNum > 254) {
+                    // Chỉ hiển thị warning nếu instance ID KHÔNG hợp lệ (< 1 hoặc > 254)
+                    // Không hiển thị gì nếu ID hợp lệ (1-254)
+                    if (Number.isFinite(idNum) && (idNum < 1 || idNum > 254)) {
                         $('<div class="invalid-feedback" style="display:block">Instance ID từ 1-254 sẽ tự động sinh tunnel address. Ngoài phạm vi này bạn cần tự nhập Tunnel address.</div>')
                             .insertAfter($(this));
                         $(this).addClass('is-invalid');
@@ -145,115 +208,170 @@
                     syncTunnelAddress($(this).val(), true);
                 });
 
-                // Kiểm tra Add hay Edit
-                const isNewRecord = $("#server\\.instance").val() === '';
+                // Kiểm tra Add hay Edit (đã check ở đầu rồi, dùng lại biến)
+                // const isNewRecord = $("#server\\.instance").val() === '';
 
                 if (isNewRecord) {
                     // ===== Add mới: tự động sinh tất cả =====
+                    // Đã clear tunnel address ở trên rồi, không cần clear nữa
                     
-                    // Gọi API getNewInstanceDefaults để lấy tất cả giá trị mặc định
-                    ajaxGet("/api/wireguard/general/getNewInstanceDefaults", {}, function (defaults) {
-                        if (defaults.instance !== undefined) {
-                            const instanceId = defaults.instance;
-                            
-                            // Điền instance ID
-                            $("#server\\.instance").val(instanceId);
-                            
-                            // Điền tunnel address (nếu có) - XỬ LÝ CHO SELECT2/TOKENIZER
-                            // Điền tunnel address (nếu có)
-                        if (defaults.tunneladdress) {
-                            const tunnelAddr = defaults.tunneladdress;
-                            const $tunnelSelect = $("#server\\.tunneladdress");
-                            
-                            // Thử cả hai cách: nếu là select thì dùng mảng, nếu là input thì dùng chuỗi
-                            if ($tunnelSelect.is('select')) {
-                                $tunnelSelect.val([tunnelAddr]);
-                            } else {
-                                $tunnelSelect.val(tunnelAddr);
-                            }
-                            $tunnelSelect.trigger('change');
-                            
-                            // Cập nhật tooltip
-                            $tunnelSelect.attr('title', 'Địa chỉ mặc định: ' + tunnelAddr + '. Bạn có thể thêm, xóa hoặc sửa.');
-                        }
-                            
-                            // Điền name (nếu trống)
-                            if (defaults.name && !$("#server\\.name").val()) {
-                                $("#server\\.name").val(defaults.name);
-                            }
-                            
-                            // Điền port (nếu trống)
-                            if (defaults.port && !$("#server\\.port").val()) {
-                                $("#server\\.port").val(defaults.port);
-                            }
-                            
-                            // Kích hoạt sự kiện change để validate
-                            $("#server\\.instance").trigger('change.wg_autotunnel');
-                            
-                            // Format lại tokenizers nếu có
-                            if (typeof formatTokenizersUI === 'function') {
-                                setTimeout(function() {
-                                    formatTokenizersUI();
-                                }, 100);
-                            }
+                    // Bước 1: Tạo keypair trước
+                    ajaxGet("/api/wireguard/general/generateKeypair", {}, function (keypairData) {
+                        if (keypairData.pubkey && keypairData.privkey) {
+                            $("#server\\.pubkey").val(keypairData.pubkey);
+                            $("#server\\.privkey").val(keypairData.privkey);
+                            console.log("Keypair generated");
                         }
                     });
-
-                    // Tạo keypair mới
-                    ajaxGet("/api/wireguard/general/generateKeypair", {}, function (data) {
-                        if (data.pubkey && data.privkey) {
-                            $("#server\\.pubkey").val(data.pubkey);
-                            $("#server\\.privkey").val(data.privkey);
+                    
+                    // Bước 2: Gọi API getNewInstanceDefaults và điền các field
+                    ajaxGet("/api/wireguard/general/getNewInstanceDefaults", {}, function (defaults) {
+                        console.log("API getNewInstanceDefaults response:", defaults);
+                        
+                        if (defaults.instance !== undefined) {
+                            // Điền các field đơn giản
+                            $("#server\\.instance").val(defaults.instance);
+                            $("#server\\.name").val(defaults.name || '');
+                            $("#server\\.port").val(defaults.port || '');
+                            
+                            console.log("Set basic fields - instance:", defaults.instance, "name:", defaults.name, "port:", defaults.port);
+                            
+                            // Xử lý tunnel address - extract value từ object format
+                            if (defaults.tunneladdress && typeof defaults.tunneladdress === 'object') {
+                                // Lấy giá trị đầu tiên từ object
+                                const tunnelValues = Object.keys(defaults.tunneladdress);
+                                console.log("Tunnel address keys:", tunnelValues);
+                                
+                                if (tunnelValues.length > 0) {
+                                    const tunnelAddr = tunnelValues[0];
+                                    console.log("Extracted tunnel address:", tunnelAddr);
+                                    
+                                    // Đợi để DOM và tokenizer sẵn sàng
+                                    setTimeout(function() {
+                                        const $tunnelField = $("#server\\.tunneladdress");
+                                        
+                                        // CRITICAL: Clear tất cả options cũ trước khi thêm option mới
+                                        // Tránh conflict khi đóng/mở dialog nhiều lần
+                                        $tunnelField.empty();
+                                        
+                                        // Thêm option mới và select nó
+                                        $tunnelField.append($('<option></option>').val(tunnelAddr).text(tunnelAddr).prop('selected', true));
+                                        
+                                        console.log("Added option to select, triggering format...");
+                                        
+                                        // Force re-initialize tokenizer - framework sẽ tự tạo token tags từ selected options
+                                        if (typeof formatTokenizersUI === 'function') {
+                                            formatTokenizersUI();
+                                            console.log("Tokenizer re-initialized - framework will create token tags");
+                                        }
+                                        
+                                        // Trigger change sau khi format
+                                        setTimeout(function() {
+                                            $tunnelField.trigger('change');
+                                            console.log("Tunnel address set complete");
+                                        }, 100);
+                                    }, 250);
+                                }
+                            }
+                            
+                            // Refresh UI sau cùng
+                            setTimeout(function() {
+                                if (typeof formatTokenizersUI === 'function') {
+                                    formatTokenizersUI();
+                                }
+                                $('.selectpicker').selectpicker('refresh');
+                                console.log("UI refreshed - Add new instance");
+                            }, 400);
                         }
                     });
 
                 } else {
                     // ===== Edit: chỉ sinh field còn thiếu =====
-                    const instanceId = $("#server\\.instance").val();
-
-                    // Kích hoạt sync tunnel address dựa trên instance hiện tại
-                    if (instanceId) {
-                        syncTunnelAddress(instanceId, false);
-                        $("#server\\.instance").trigger('change.wg_autotunnel');
-                    }
-
-                    // Name nếu trống
-                    if (!$("#server\\.name").val() && instanceId) {
-                        ajaxGet("/api/wireguard/general/generateInstanceName/" + instanceId, {}, function (data) {
-                            if (data.name) {
-                                $("#server\\.name").val(data.name);
+                    // QUAN TRỌNG: Đợi form load xong data từ API trước (framework cần thời gian để map data)
+                    setTimeout(function() {
+                        const instanceId = $("#server\\.instance").val();
+                        console.log("Edit mode - Instance ID:", instanceId);
+                        
+                        // Chỉ kích hoạt event handler, KHÔNG gọi syncTunnelAddress để tránh overwrite data
+                        // Data đã được load từ API, chỉ cần setup event cho lần change tiếp theo
+                        if (instanceId) {
+                            // Trigger change chỉ để setup validation UI, không overwrite
+                            const $tunnelField = $("#server\\.tunneladdress");
+                            const currentTunnelValue = $tunnelField.val();
+                            console.log("Current tunnel address:", currentTunnelValue);
+                            
+                            // Chỉ trigger validation, không sync lại tunnel address
+                            const idNum = parseInt(instanceId, 10);
+                            const oldFeedback = $("#server\\.instance").closest('.form-group').find('.invalid-feedback');
+                            oldFeedback.remove();
+                            $("#server\\.instance").removeClass('is-invalid');
+                            
+                            if (!Number.isFinite(idNum) || idNum < 1 || idNum > 254) {
+                                $('<div class="invalid-feedback" style="display:block">Instance ID từ 1-254 sẽ tự động sinh tunnel address. Ngoài phạm vi này bạn cần tự nhập Tunnel address.</div>')
+                                    .insertAfter($("#server\\.instance"));
+                                $("#server\\.instance").addClass('is-invalid');
                             }
-                        });
-                    }
+                        }
 
-                    // Listen port nếu trống
-                    if (!$("#server\\.port").val()) {
-                        ajaxGet("/api/wireguard/general/getNextListenPort", {}, function (data) {
-                            if (data.port) {
-                                $("#server\\.port").val(data.port);
-                            }
-                        });
-                    }
+                        // Name nếu trống
+                        if (!$("#server\\.name").val() && instanceId) {
+                            ajaxGet("/api/wireguard/general/generateInstanceName/" + instanceId, {}, function (data) {
+                                if (data.name) {
+                                    $("#server\\.name").val(data.name);
+                                }
+                            });
+                        }
 
-                    // keypair nếu trống
-                    if ((!$("#server\\.pubkey").val() || !$("#server\\.privkey").val()) && 
-                        confirm("Bạn chưa có keypair. Bạn có muốn tạo keypair mới không?")) {
-                        ajaxGet("/api/wireguard/general/generateKeypair", {}, function (data) {
-                            if (data.pubkey && data.privkey) {
-                                $("#server\\.pubkey").val(data.pubkey);
-                                $("#server\\.privkey").val(data.privkey);
-                            }
-                        });
-                    }
+                        // Listen port nếu trống
+                        if (!$("#server\\.port").val()) {
+                            ajaxGet("/api/wireguard/general/getNextListenPort", {}, function (data) {
+                                if (data.port) {
+                                    $("#server\\.port").val(data.port);
+                                }
+                            });
+                        }
+
+                        // keypair nếu trống
+                        if ((!$("#server\\.pubkey").val() || !$("#server\\.privkey").val()) && 
+                            confirm("Bạn chưa có keypair. Bạn có muốn tạo keypair mới không?")) {
+                            ajaxGet("/api/wireguard/general/generateKeypair", {}, function (data) {
+                                if (data.pubkey && data.privkey) {
+                                    $("#server\\.pubkey").val(data.pubkey);
+                                    $("#server\\.privkey").val(data.privkey);
+                                }
+                            });
+                        }
+                    }, 300); // Đợi 300ms để framework map data xong
                 }
                 
                 // Format lại tokenizers sau khi tất cả đã load xong
+                // Tăng timeout để đảm bảo data từ API đã được map xong vào form
                 setTimeout(function() {
                     if (typeof formatTokenizersUI === 'function') {
                         formatTokenizersUI();
                     }
                     $('.selectpicker').selectpicker('refresh');
-                }, 200);
+                    
+                    // CRITICAL: Force refresh lần cuối cho tunnel address field
+                    const $tunnelField = $("#server\\.tunneladdress");
+                    const finalValue = $tunnelField.val();
+                    console.log("Final refresh - Tunnel address value:", finalValue);
+                    
+                    if (finalValue && finalValue.length > 0) {
+                        // Re-trigger formatTokenizersUI specifically for this field
+                        $tunnelField.trigger('change');
+                        
+                        // Double check tokenizer is visible
+                        setTimeout(function() {
+                            if (typeof formatTokenizersUI === 'function') {
+                                formatTokenizersUI();
+                            }
+                            console.log("All UI components refreshed");
+                        }, 100);
+                    } else {
+                        console.log("All UI components refreshed");
+                    }
+                }, 400);
             });
         });
 
