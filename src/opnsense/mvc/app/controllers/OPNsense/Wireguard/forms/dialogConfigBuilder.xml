@@ -8,9 +8,7 @@
     <field>
         <id>configbuilder.endpoint_ip</id>
         <label>Endpoint IP</label>
-        <type>select_multiple</type>
-        <style>tokenize</style>
-        <allownew>true</allownew>
+       <type>dropdown</type>
         <help>Select or enter the public IP/hostname to reach this firewall.</help>
     </field>
     <field>

@@ -472,7 +472,7 @@
                         let endpointIp = parts[0] || '';
                         let endpointPort = parts[1] || '51820';
                         
-                        $("#configbuilder\\.endpoint_ip").val(endpointIp).data('org-value', endpointIp);
+                        $("#configbuilder\\.endpoint_ip").val(endpointIp).data('org-value', endpointIp).selectpicker('refresh');
                         $("#configbuilder\\.endpoint_port").val(endpointPort);
                     }
                     
@@ -524,9 +524,13 @@
                             }
                         };
                         ajaxCall('/api/wireguard/server/set_server/' + instance_id, param, function(data, status){
+                            // Reload tab peers để hiển thị cấu hình mới
+                            $('#{{formGridWireguardClient['table_id']}}').bootgrid('reload');
                             configbuilder_new();
                         });
                     } else {
+                        // Reload tab peers để hiển thị cấu hình mới
+                        $('#{{formGridWireguardClient['table_id']}}').bootgrid('reload');
                         configbuilder_new();
                     }
                 }
@@ -566,11 +570,12 @@
                 // Mặc định Allowed IPs
                 $("#configbuilder\\.tunneladdress").val("0.0.0.0/0,::/0");
                 
-                // Load danh sách IPs của firewall cho Endpoint IP dropdown
+                // Load danh sách IPs của firewall cho Endpoint IP dropdown (single select)
                 ajaxGet("/api/wireguard/general/getFirewallIps", {}, function(data) {
                     if (data.ips) {
                         let select = $("#configbuilder\\.endpoint_ip");
                         select.empty();
+                        select.append($('<option></option>').val("").text("-- " + "{{ lang._('Select or enter custom') }}" + " --"));
                         data.ips.forEach(function(ip) {
                             select.append($('<option></option>').val(ip.value).text(ip.label));
                         });
@@ -601,6 +606,46 @@
                             select.append($('<option></option>').val(ip.value).text(ip.label));
                         });
                         select.selectpicker('refresh');
+                    }
+                });
+                
+                // Xử lý custom input cho Endpoint IP
+                $("#configbuilder\\.endpoint_ip").on('changed.bs.select', function(e, clickedIndex, isSelected, previousValue) {
+                    let selectedValue = $(this).val();
+                    if (selectedValue === "" && isSelected) {
+                        // Nếu chọn option trống, hiện prompt để nhập custom value
+                        BootstrapDialog.show({
+                            title: "{{ lang._('Enter Custom Endpoint IP') }}",
+                            message: '<input type="text" class="form-control" id="custom_endpoint_ip" placeholder="Enter IP or hostname">',
+                            buttons: [{
+                                label: "{{ lang._('OK') }}",
+                                action: function(dialog) {
+                                    let customIp = $('#custom_endpoint_ip').val().trim();
+                                    if (customIp) {
+                                        // Thêm option mới và select nó
+                                        let $select = $("#configbuilder\\.endpoint_ip");
+                                        // Kiểm tra xem đã tồn tại chưa
+                                        if ($select.find('option[value="' + customIp + '"]').length === 0) {
+                                            $select.append($('<option></option>').val(customIp).text(customIp + ' (custom)'));
+                                        }
+                                        $select.val(customIp);
+                                        $select.selectpicker('refresh');
+                                        $select.change();
+                                    } else {
+                                        $("#configbuilder\\.endpoint_ip").val('');
+                                        $("#configbuilder\\.endpoint_ip").selectpicker('refresh');
+                                    }
+                                    dialog.close();
+                                }
+                            }, {
+                                label: "{{ lang._('Cancel') }}",
+                                action: function(dialog) {
+                                    $("#configbuilder\\.endpoint_ip").val(previousValue || '');
+                                    $("#configbuilder\\.endpoint_ip").selectpicker('refresh');
+                                    dialog.close();
+                                }
+                            }]
+                        });
                     }
                 });
                 
