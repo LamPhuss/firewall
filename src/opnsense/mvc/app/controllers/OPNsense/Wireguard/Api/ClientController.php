@@ -146,11 +146,31 @@ class ClientController extends ApiMutableModelControllerBase
     public function addClientBuilderAction()
     {
         $uuid = null;
+        $server = null;
         if ($this->request->isPost() && !empty($this->request->getPost('configbuilder'))) {
             Config::getInstance()->lock();
             $mdl = new Server();
             $uuid = $this->getModel()->clients->generateUUID();
             $server = $this->request->getPost('configbuilder')['server'];
+            
+            // Lấy dữ liệu từ configbuilder
+            $configbuilder = $this->request->getPost('configbuilder');
+            
+            // Map serveraddress và serverport từ form configbuilder
+            if (isset($configbuilder['serveraddress']) && !empty($configbuilder['serveraddress'])) {
+                // Đã có serveraddress từ form
+            } elseif (isset($configbuilder['endpoint_ip']) && !empty($configbuilder['endpoint_ip'])) {
+                // Chuyển từ endpoint_ip sang serveraddress
+                $_POST['configbuilder']['serveraddress'] = $configbuilder['endpoint_ip'];
+            }
+            
+            if (isset($configbuilder['serverport']) && !empty($configbuilder['serverport'])) {
+                // Đã có serverport từ form
+            } elseif (isset($configbuilder['endpoint_port']) && !empty($configbuilder['endpoint_port'])) {
+                // Chuyển từ endpoint_port sang serverport
+                $_POST['configbuilder']['serverport'] = $configbuilder['endpoint_port'];
+            }
+            
             foreach ($mdl->servers->server->iterateItems() as $key => $node) {
                 if ($key == $server) {
                     $peers = array_filter(explode(',', (string)$node->peers));
@@ -166,7 +186,105 @@ class ClientController extends ApiMutableModelControllerBase
             $mdl->serializeToConfig(false, true);
         }
 
-        return $this->setBase('configbuilder', 'clients.client', $uuid);
+        $result = $this->setBase('configbuilder', 'clients.client', $uuid);
+        
+        // Xác định UUID chính xác
+        if (isset($result['uuid'])) {
+            $add_uuid = $result['uuid'];
+        } elseif ($uuid) {
+            $add_uuid = $uuid;
+        } else {
+            return $result;
+        }
+        
+        // Nếu lưu thành công, trả về toàn bộ cấu hình
+        if ($result['result'] == 'saved' && !empty($add_uuid)) {
+            try {
+                // Lấy thông tin peer vừa tạo
+                $clientNode = $this->getModel()->getNodeByReference('clients.client.' . $add_uuid);
+                if ($clientNode !== null) {
+                    $result['peer'] = [
+                        'uuid' => $add_uuid,
+                        'name' => (string)$clientNode->name,
+                        'enabled' => (string)$clientNode->enabled,
+                        'pubkey' => (string)$clientNode->pubkey,
+                        'tunneladdress' => (string)$clientNode->tunneladdress,
+                        'keepalive' => (string)$clientNode->keepalive,
+                        'psk' => !empty((string)$clientNode->psk) ? '[SET]' : '',
+                        'serveraddress' => (string)$clientNode->serveraddress,
+                        'serverport' => (string)$clientNode->serverport,
+                    ];
+                    
+                    // Lấy thông tin server
+                    $server_uuid = $this->request->getPost('configbuilder')['server'] ?? $server;
+                    if (!empty($server_uuid)) {
+                        $serverModel = new Server();
+                        $serverNode = $serverModel->getNodeByReference('servers.server.' . $server_uuid);
+                        if ($serverNode !== null) {
+                            $result['server'] = [
+                                'name' => (string)$serverNode->name,
+                                'endpoint' => (string)$serverNode->endpoint,
+                                'pubkey' => (string)$serverNode->pubkey,
+                            ];
+                            
+                            // Tạo cấu hình WireGuard
+                            $configLines = [];
+                            $configLines[] = '[Interface]';
+                            $configLines[] = 'PrivateKey = [HIDDEN - Check peer generator form]';
+                            
+                            $tunnelAddr = (string)$clientNode->tunneladdress;
+                            if (!empty($tunnelAddr)) {
+                                $configLines[] = 'Address = ' . $tunnelAddr;
+                            }
+                            
+                            // Thêm DNS nếu có từ request hoặc server
+                            $configbuilder = $this->request->getPost('configbuilder');
+                            if (is_array($configbuilder) && !empty($configbuilder['peer_dns'])) {
+                                $configLines[] = 'DNS = ' . $configbuilder['peer_dns'];
+                            } elseif (!empty((string)$serverNode->peer_dns)) {
+                                $configLines[] = 'DNS = ' . (string)$serverNode->peer_dns;
+                            }
+                            
+                            // Thêm MTU nếu có từ server
+                            if (!empty((string)$serverNode->mtu)) {
+                                $configLines[] = 'MTU = ' . (string)$serverNode->mtu;
+                            }
+                            
+                            $configLines[] = '';
+                            $configLines[] = '[Peer]';
+                            $configLines[] = 'PublicKey = ' . (string)$serverNode->pubkey;
+                            
+                            if (!empty((string)$clientNode->psk)) {
+                                $configLines[] = 'PresharedKey = [SET]';
+                            }
+                            
+                            $endpoint = (string)$serverNode->endpoint;
+                            if (!empty($endpoint)) {
+                                $configLines[] = 'Endpoint = ' . $endpoint;
+                            }
+                            
+                            // AllowedIPs - sử dụng tunnel address của client
+                            if (!empty($tunnelAddr)) {
+                                $configLines[] = 'AllowedIPs = ' . $tunnelAddr;
+                            } else {
+                                $configLines[] = 'AllowedIPs = 0.0.0.0/0, ::/0';
+                            }
+                            
+                            $keepalive = (string)$clientNode->keepalive;
+                            if (!empty($keepalive)) {
+                                $configLines[] = 'PersistentKeepalive = ' . $keepalive;
+                            }
+                            
+                            $result['config_preview'] = implode("\n", $configLines);
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                $result['error'] = 'Error generating config: ' . $e->getMessage();
+            }
+        }
+        
+        return $result;
     }
 
     public function getServerInfoAction($uuid = null)

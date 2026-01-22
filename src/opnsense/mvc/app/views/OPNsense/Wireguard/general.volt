@@ -492,19 +492,37 @@
             let endpoint = endpointIp + ':' + endpointPort;
             let peer_dns = $("#configbuilder\\.peer_dns");
             
+            // Kiểm tra các trường bắt buộc
+            if (!instance_id) {
+                alert("{{ lang._('Please select a server instance') }}");
+                return;
+            }
+            
+            if (!$("#configbuilder\\.name").val()) {
+                alert("{{ lang._('Please enter a peer name') }}");
+                return;
+            }
+            
             let peer = {
                 configbuilder: {
                     enabled: '1',
-                    name: $("#configbuilder\\.name").val(),
-                    pubkey: $("#configbuilder\\.pubkey").val(),
-                    psk: $("#configbuilder\\.psk").val(),
-                    tunneladdress: $("#configbuilder\\.address").val(),
-                    keepalive: $("#configbuilder\\.keepalive").val(),
-                    server: instance_id,
-                    endpoint: endpoint
+                    name: String($("#configbuilder\\.name").val() || ''),
+                    pubkey: String($("#configbuilder\\.pubkey").val() || ''),
+                    psk: String($("#configbuilder\\.psk").val() || ''),
+                    tunneladdress: String($("#configbuilder\\.address").val() || ''),
+                    keepalive: String($("#configbuilder\\.keepalive").val() || ''),
+                    server: String(instance_id || ''),
+                    // Gửi serveraddress và serverport riêng biệt để hiển thị trong grid
+                    serveraddress: String(endpointIp || ''),
+                    serverport: String(endpointPort || ''),
+                    peer_dns: String(peer_dns.val() || '')
                 }
             };
+            
+            console.log('Sending peer data:', peer);
+            
             ajaxCall('/api/wireguard/client/add_client_builder', peer, function(data, status) {
+                console.log('Response received:', data);
                 if (data.validations) {
                     if (data.validations['configbuilder.tunneladdress']) {
                         /*
@@ -515,14 +533,81 @@
                         delete data.validations['configbuilder.tunneladdress'];
                     }
                     handleFormValidation("frm_config_builder", data.validations);
-                } else {
+                } else if (data.result === 'saved') {
+                    // Hiển thị thông báo thành công với cấu hình
+                    if (data.peer) {
+                        let message = '<div style="max-height: 500px; overflow-y: auto;">';
+                        message += '<h4 style="color: #5cb85c; margin-top: 0;">✓ Peer Created Successfully!</h4>';
+                        message += '<hr style="margin: 10px 0;">';
+                        
+                        message += '<h5><strong>Peer Information:</strong></h5>';
+                        message += '<table class="table table-condensed" style="margin-bottom: 15px;">';
+                        message += '<tr><td style="width: 150px;"><strong>Name:</strong></td><td>' + data.peer.name + '</td></tr>';
+                        message += '<tr><td><strong>Public Key:</strong></td><td><code style="font-size: 11px;">' + data.peer.pubkey + '</code></td></tr>';
+                        message += '<tr><td><strong>Tunnel Address:</strong></td><td><code>' + data.peer.tunneladdress + '</code></td></tr>';
+                        if (data.peer.serveraddress) {
+                            message += '<tr><td><strong>Endpoint Address:</strong></td><td><code>' + data.peer.serveraddress + '</code></td></tr>';
+                        }
+                        if (data.peer.serverport) {
+                            message += '<tr><td><strong>Endpoint Port:</strong></td><td><code>' + data.peer.serverport + '</code></td></tr>';
+                        }
+                        if (data.peer.keepalive) {
+                            message += '<tr><td><strong>Keep Alive:</strong></td><td>' + data.peer.keepalive + 's</td></tr>';
+                        }
+                        if (data.peer.psk) {
+                            message += '<tr><td><strong>Pre-shared Key:</strong></td><td>' + data.peer.psk + '</td></tr>';
+                        }
+                        message += '</table>';
+                        
+                        if (data.server) {
+                            message += '<h5><strong>Server Information:</strong></h5>';
+                            message += '<table class="table table-condensed" style="margin-bottom: 15px;">';
+                            message += '<tr><td style="width: 150px;"><strong>Instance:</strong></td><td>' + data.server.name + '</td></tr>';
+                            message += '<tr><td><strong>Endpoint:</strong></td><td><code>' + data.server.endpoint + '</code></td></tr>';
+                            message += '<tr><td><strong>Server Pubkey:</strong></td><td><code style="font-size: 11px;">' + data.server.pubkey + '</code></td></tr>';
+                            message += '</table>';
+                        }
+                        
+                        if (data.config_preview) {
+                            message += '<h5><strong>Configuration Preview:</strong></h5>';
+                            message += '<pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 12px; max-height: 250px; overflow-y: auto;">' + data.config_preview + '</pre>';
+                            message += '<p style="color: #888; font-size: 12px; margin-top: 10px;"><em>Note: Remember to use the actual private key from the form when creating the config file.</em></p>';
+                        }
+                        
+                        message += '</div>';
+                        
+                        // Hiển thị modal với thông tin
+                        BootstrapDialog.show({
+                            type: BootstrapDialog.TYPE_SUCCESS,
+                            title: 'Peer Created Successfully',
+                            message: message,
+                            size: BootstrapDialog.SIZE_WIDE,
+                            buttons: [{
+                                label: 'Close',
+                                cssClass: 'btn-success',
+                                action: function(dialogRef) {
+                                    dialogRef.close();
+                                }
+                            }]
+                        });
+                        
+                        console.log('Peer created:', data);
+                    }
+                    
                     if (endpointIp != $("#configbuilder\\.endpoint_ip").data('org-value') || peer_dns.val() != peer_dns.data('org-value')) {
+                        // Đảm bảo tất cả giá trị là string, không phải array
+                        let endpointValue = String(endpoint || '');
+                        let peerDnsValue = String(peer_dns.val() || '');
+                        
                         let param = {
                             'server': {
-                                'endpoint': endpoint,
-                                'peer_dns': peer_dns.val()
+                                'endpoint': endpointValue,
+                                'peer_dns': peerDnsValue
                             }
                         };
+                        
+                        console.log('Updating server with param:', param);
+                        
                         ajaxCall('/api/wireguard/server/set_server/' + instance_id, param, function(data, status){
                             // Reload tab peers để hiển thị cấu hình mới
                             $('#{{formGridWireguardClient['table_id']}}').bootgrid('reload');
@@ -533,6 +618,21 @@
                         $('#{{formGridWireguardClient['table_id']}}').bootgrid('reload');
                         configbuilder_new();
                     }
+                } else if (data.error) {
+                    // Hiển thị lỗi từ API
+                    BootstrapDialog.show({
+                        type: BootstrapDialog.TYPE_DANGER,
+                        title: '{{ lang._("Error") }}',
+                        message: '<div class="alert alert-danger">' + data.error + '</div>',
+                        buttons: [{
+                            label: '{{ lang._("Close") }}',
+                            action: function(dialogRef) {
+                                dialogRef.close();
+                            }
+                        }]
+                    });
+                } else {
+                    console.warn('Unexpected response:', data);
                 }
             });
         });
