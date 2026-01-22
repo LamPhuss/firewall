@@ -96,11 +96,12 @@
 
 </script>
 
-<ul class="nav nav-tabs" data-tabs="tabs" id="maintabs">
+<!-- TODO: delete components <ul class="nav nav-tabs" data-tabs="tabs" id="maintabs">
     <li class="active"><a id="systemtab" data-toggle="tab" href="#full_defaults">{{ lang._('Full') }}</a></li>
     <li id="componentstab"><a data-toggle="tab" href="#components">{{ lang._('Components') }}</a></li>
-</ul>
-<div class="tab-content content-box">
+</ul> -->
+<!-- <div class="tab-content content-box"> -->
+<div class="content-box">
     <div id="full_defaults" class="tab-pane fade in active">
         <div class="container-fluid">
             <div class="row">
@@ -124,7 +125,7 @@
             </div>
         </div>
     </div>
-    <div id="components" class="tab-pane fade in">
+    <!-- TODO: delete components <div id="components" class="tab-pane fade in">
         <table class="table table-condensed table-striped">
             <br/>
             <thead>
@@ -149,5 +150,5 @@
                 </tr>
             </tbody>
         </table>
-    </div>
+    </div> -->
 </div>

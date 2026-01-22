@@ -72,7 +72,7 @@
             <Authorities url="/ui/trust/ca"/>
             <Certificates url="/ui/trust/cert"/>
             <Revocation url="/ui/trust/crl"/>
-            <Settings url="/ui/trust/settings"/>
+            <Settings url="/ui/trust/settings" visibility="delete"/>
         </Trust>
         <LogFiles order="150" VisibleName="Log Files" cssClass="fa fa-eye fa-fw" visibility="delete">
             <Audit url="/ui/diagnostics/log/core/audit"/>
@@ -119,7 +119,7 @@
             <Statistics url="/ui/diagnostics/firewall/statistics"/>
         </Diagnostics>
         <LogFiles order="400" VisibleName="Log Files" cssClass="fa fa-eye fa-fw">
-            <General VisibleName="General" url="/ui/diagnostics/log/core/firewall"/>
+            <General VisibleName="General" url="/ui/diagnostics/log/core/firewall" visibility="delete"/>
             <Live VisibleName="Live View" url="/ui/diagnostics/firewall/log"/>
             <Overview url="/ui/diagnostics/firewall/stats"/>
             <Plain VisibleName="Plain View" url="/ui/diagnostics/log/core/filter" visibility="delete"/>
