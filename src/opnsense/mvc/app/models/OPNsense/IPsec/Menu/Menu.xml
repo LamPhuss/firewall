@@ -1,6 +1,6 @@
 <menu>
     <VPN>
-        <IPsec cssClass="fa fa-lock fa-fw" visibility="hidden">
+        <!-- <IPsec cssClass="fa fa-lock fa-fw" visibility="delete">
             <Connections order="5" VisibleName="Connections" url="/ui/ipsec/connections"/>
             <Keys order="30" VisibleName="Pre-Shared Keys" url="/ui/ipsec/pre_shared_keys"/>
             <KeyPairs order="40" VisibleName="Key Pairs" url="/ui/ipsec/key_pairs" />
@@ -11,6 +11,6 @@
             <SPD order="90" VisibleName="Security Policy Database" url="/ui/ipsec/spd"/>
             <VTI order="90" VisibleName="Virtual Tunnel Interfaces" url="/ui/ipsec/vti"/>
             <LogFile order="100" VisibleName="Log File" url="/ui/diagnostics/log/core/ipsec"/>
-        </IPsec>
+        </IPsec> -->
     </VPN>
 </menu>

@@ -7,7 +7,7 @@
           <Status order="40" url="/ui/wireguard/diagnostics/"/>
           <LogFile order="50" VisibleName="Log File" url="/ui/diagnostics/log/core/wireguard"/>
       </WireGuard>
-      <OpenVPN cssClass="fa fa-lock fa-fw" visibility="delete">
+      <OpenVPN cssClass="fa fa-lock fa-fw">
           <Instances order="10" url="/ui/openvpn/instances"/>
           <CSC order="30" VisibleName="Client Specific Overrides" url="/ui/openvpn/client_overwrites"/>
           <ClientExport order="40" VisibleName="Client Export" url="/ui/openvpn/export">
