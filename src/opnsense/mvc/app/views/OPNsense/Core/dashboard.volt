@@ -82,4 +82,5 @@
         widgetManager.initialize();
     });
 </script>
+
 <div class="grid-stack"></div>

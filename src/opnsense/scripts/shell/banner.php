@@ -33,16 +33,15 @@ require_once("config.inc");
 require_once("interfaces.inc");
 require_once("util.inc");
 require_once("plugins.inc.d/openssh.inc");
+require_once("/usr/local/opnsense/scripts/shell/langmode.php");
 
-$version = shell_safe('opnsense-version');
-
-echo "\n*** {$config['system']['hostname']}.{$config['system']['domain']}: {$version} ***\n";
+echo "\n*** BKCSense ***\n";
 
 $iflist = legacy_config_get_interfaces(['enable' => true, 'virtual' => false]);
 $ifdetails = legacy_interfaces_details();
 
 if (!count($iflist)) {
-    echo "\n\tNo network interfaces are assigned.\n";
+    echo "\n\t" . __('No network interfaces are assigned.') . "\n";
     return;
 }
 
