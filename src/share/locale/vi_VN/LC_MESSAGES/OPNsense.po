@@ -10966,7 +10966,7 @@ msgstr "Chuyển đổi điều hướng"
 #. File: /usr/core/src/opnsense/mvc/app/views/layouts/default.volt, line: 181
 #: 
 msgid "Showing %s to %s of %s entries"
-msgstr "Đang hiển thị %s đến %s trong số %s hàng"
+msgstr "Đang hiển thị %s đến %s trong số %s cấu hình"
 
 #. File: /usr/core/src/opnsense/mvc/app/views/layout_partials/form_input_tr.volt, line: 62
 #: 
@@ -25301,7 +25301,7 @@ msgstr "Thêm ;rport vào OUTGOING qua tiêu đề (2)"
 #. File: /usr/lang/src/models.php, line: 77
 #: 
 msgid "Administration"
-msgstr "Sự quản lý"
+msgstr "Quản trị"
 
 #. File: /usr/plugins/net/haproxy/src/opnsense/mvc/app/views/OPNsense/HAProxy/index.volt, line: 451
 #. File: /usr/core/src/www/firewall_nat_edit.php, line: 595
@@ -25584,18 +25584,18 @@ msgstr "NgaoAV"
 #. File: /usr/lang/src/models.php, line: 123
 #: 
 msgid "Client Export"
-msgstr "Xuất khách hàng"
+msgstr "Xuất thông tin máy khách"
 
 #. File: /usr/lang/src/models.php, line: 124
 #: 
 msgid "Client Specific Overrides"
-msgstr "Ghi đè cụ thể của khách hàng"
+msgstr "Ghi đè cấu hình máy khách"
 
 #. File: /usr/plugins/net/freeradius/src/opnsense/mvc/app/views/OPNsense/Freeradius/client.volt, line: 80
 #. File: /usr/lang/src/models.php, line: 125
 #: 
 msgid "Clients"
-msgstr "Khách hàng"
+msgstr "Máy khách"
 
 #. File: /usr/lang/src/models.php, line: 129
 #: 
