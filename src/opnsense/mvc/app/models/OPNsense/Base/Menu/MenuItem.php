@@ -327,23 +327,12 @@ class MenuItem
             $isNew = true;
         }
 
-        // Preserve visibility="delete" if already set, unless explicitly set to delete again
-        $preserveDelete = false;
-        if (!$isNew && $newMenuItem->getVisibility() == 'delete') {
-            $preserveDelete = true;
-        }
-
         // set attributes
         foreach ($properties as $propname => $propvalue) {
             $methodName = $newMenuItem->getXmlPropertySetterName($propname);
             if ($methodName !== null) {
                 $newMenuItem->$methodName((string)$propvalue);
             }
-        }
-
-        // Restore visibility="delete" if it was set before and not explicitly set again
-        if ($preserveDelete && (!isset($properties['visibility']) || $properties['visibility'] != 'delete')) {
-            $newMenuItem->setVisibility('delete');
         }
 
         $orderNum = sprintf("%05d", $newMenuItem->getOrder());

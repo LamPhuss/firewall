@@ -62,7 +62,7 @@ function _killbypid($pid, $sig, $waitforit, $caller)
         return;
     }
 
-    while (mwexecf('/bin/kill -0 %s', $pid, true) == 0) {
+    while (mwexecfm('/bin/kill -0 %s', $pid) == 0) {
         usleep(200 * 1000);
     }
 }
@@ -70,7 +70,7 @@ function _killbypid($pid, $sig, $waitforit, $caller)
 function isvalidpid($pidfile)
 {
     if (file_exists($pidfile)) {
-        return mwexecf('/bin/pgrep -nF %s', $pidfile, true) == 0;
+        return mwexecfm('/bin/pgrep -nF %s', $pidfile) == 0;
     }
 
     return false;
@@ -103,9 +103,7 @@ function waitfordad($grace_period = 1)
 
 function is_process_running($process)
 {
-    exec('/bin/pgrep -anx ' . escapeshellarg($process), $output, $retval);
-
-    return (intval($retval) == 0);
+    return !mwexecfm('/bin/pgrep -anx %s', $process);
 }
 
 function service_by_filter($filter = [])
@@ -230,7 +228,7 @@ function service_control_start($name, $extras)
         }
     } elseif (isset($service['mwexec']['start'])) {
         foreach ($service['mwexec']['start'] as $cmd) {
-            mwexec($cmd);
+            mwexecf($cmd);
         }
     } else {
         return sprintf(gettext("Could not start service `%s'"), htmlspecialchars(service_name($service)));
@@ -256,7 +254,7 @@ function service_control_stop($name, $extras)
         }
     } elseif (isset($service['mwexec']['stop'])) {
         foreach ($service['mwexec']['stop'] as $cmd) {
-            mwexec($cmd);
+            mwexecf($cmd);
         }
     } elseif (isset($service['pidfile'])) {
         killbypid($service['pidfile']);
@@ -291,7 +289,7 @@ function service_control_restart($name, $extras)
         }
     } elseif (isset($service['mwexec']['restart'])) {
         foreach ($service['mwexec']['restart'] as $cmd) {
-            mwexec($cmd);
+            mwexecf($cmd);
         }
     } else {
         return sprintf(gettext("Could not restart service `%s'"), htmlspecialchars(service_name($service)));
@@ -948,11 +946,6 @@ function mwexec_bg($command, $mute = false) /* XXX deprecated */
     mwexec("/usr/sbin/daemon -f {$command}", $mute);
 }
 
-function mwexecf_bg($format, $args = [], $mute = false) /* XXX deprecated */
-{
-    mwexec_bg(exec_safe($format, $args), $mute);
-}
-
 /* safe shell command formatter */
 function exec_safe($format, $args = [])
 {
@@ -984,10 +977,24 @@ function mwexecfm($format, $args = [])
 }
 
 /* run commands safely in the background */
-function mwexecfb($format, $args = [])
+function mwexecfb($format, $args = [], ?string $pidfile = null, ?string $logfile = null)
 {
     if (!is_array($format)) {
         $format = [$format];
+    }
+
+    if (!is_array($args)) {
+        $args = [$args];
+    }
+
+    if (!is_null($pidfile)) {
+        array_unshift($format, '-p %s');
+        array_unshift($args, $pidfile);
+    }
+
+    if (!is_null($logfile)) {
+        array_unshift($format, '-o %s');
+        array_unshift($args, $logfile);
     }
 
     array_unshift($format, '/usr/sbin/daemon -f');
@@ -1053,19 +1060,22 @@ function get_sysctl($names)
         return [];
     }
 
-    if (is_array($names)) {
-        $name_list = [];
-        foreach ($names as $name) {
-            $name_list[] = escapeshellarg($name);
-        }
-    } else {
-        $name_list = [escapeshellarg($names)];
+    if (!is_array($names)) {
+        $names = [$names];
     }
 
-    exec("/sbin/sysctl -i " . implode(" ", $name_list), $output);
+    $frmt = ['/sbin/sysctl -i'];
+    $args = [];
+
+    foreach ($names as $name) {
+        $args[] = $name;
+        $frmt[] = '%s';
+    }
+
     $values = [];
-    foreach ($output as $line) {
-        $line = explode(": ", $line, 2);
+
+    foreach (shell_safe($frmt, $args, true) as $line) {
+        $line = explode(': ', $line, 2);
         if (count($line) == 2) {
             $values[$line[0]] = $line[1];
         }
@@ -1109,24 +1119,24 @@ function set_sysctl($values, $filter = true)
     $sysctls = null;
 
     if ($filter) {
-        exec('/sbin/sysctl -WaN', $list, $success);
-        if ($success == 0) {
-            $sysctls = $list;
-        }
+        $sysctls = shell_safe('/sbin/sysctl -WaN', [], true);
     }
 
-    $value_list = [];
+    $frmt = ['/sbin/sysctl'];
+    $args = [];
+
     foreach ($values as $key => $value) {
         if ($sysctls !== null && !in_array($key, $sysctls)) {
             continue;
         }
-        $value_list[] = escapeshellarg($key) . '=' . escapeshellarg($value);
+
+        $frmt[] = '%s=%s';
+        $args[] = $key;
+        $args[] = $value;
     }
 
-    if (count($value_list)) {
-        exec('/sbin/sysctl ' . implode(' ', $value_list), $output);
-
-        foreach ($output as $line) {
+    if (count($args)) {
+        foreach (shell_safe($frmt, $args, true) as $line) {
             $line = explode(': ', $line, 2);
             if (count($line) == 2) {
                 $ret[$line[0]] = true;
@@ -1222,6 +1232,14 @@ function is_install_media()
     }
 
     return true;
+}
+
+function is_ipv6_allowed()
+{
+    global $config;
+
+    /* the setting is negated on purpose so it always defaults to enabled */
+    return empty($config['OPNsense']['Interfaces']['settings']['disableipv6']);
 }
 
 function dhcp6c_duid_read()

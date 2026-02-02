@@ -105,25 +105,30 @@
                         };
                         const addUrl = `${baseUrl}?${new URLSearchParams(addUrlParams)}`;
 
+                        let btn;
+
                         if (row.is_reserved === '1') {
-                            return `
-                                <button type="button" class="btn btn-xs"
-                                    onclick="window.location.href = '${searchUrl}'"
+                            btn = $(`
+                                <button type="button" class="btn btn-xs" data-toggle="tooltip"
                                     title="{{ lang._('Find Reservation') }}">
                                     <i class="fa fa-fw fa-search"></i>
                                 </button>
-                            `;
+                            `).on('click', function () {
+                                window.location.href = searchUrl;
+                            });
                         } else {
-                            return `
-                                <button type="button" class="btn btn-xs"
-                                    onclick="window.location.href = '${addUrl}'"
+                            btn = $(`
+                                <button type="button" class="btn btn-xs" data-toggle="tooltip"
                                     title="{{ lang._('Add Reservation') }}">
                                     <i class="fa fa-fw fa-plus"></i>
                                 </button>
-                            `;
+                            `).on('click', function () {
+                                window.location.href = addUrl;
+                            });
                         }
-                    }
 
+                        return btn[0];
+                    }
                 }
             }
         });

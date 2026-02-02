@@ -696,6 +696,8 @@ $.fn.SimpleActionButton = function (params) {
                     if (this_button.data('grid-reload')) {
                         $(this_button.data('grid-reload')).bootgrid('reload');
                     }
+
+                    updateSystemStatus();
                 });
             }).fail(function () {
                 setIcon(icon, 'fa fa-check fa-spinner fa-pulse', '');
@@ -811,6 +813,7 @@ $.fn.fetch_options = function(url, params, data_callback, store_data, post_callb
  *          {
  *            'sequence': X << sequence number,  first data record starts at 0
  *            'message': '' << validation message
+ *            'field': '' << fieldname
  *          }
  *     ]
  *  }
@@ -825,7 +828,7 @@ $.fn.SimpleFileUploadDlg = function (params) {
         this_button.click(function(){
             let content = $("<div/>");
             let fileinp = $("<input type='file'/>");
-            let error_output = $("<textarea style='display:none; max-width:100%; height:200px;'/>");
+            let error_output = $("<tbody/>");
             let doinp = $('<button style="display:none" type="button" class="btn btn-xs"/>');
             doinp.append($('<span class="fa fa-fw fa-check"></span>'));
 
@@ -838,7 +841,12 @@ $.fn.SimpleFileUploadDlg = function (params) {
                     $("<tr/>").append($("<td colspan='2' style='height:10px;'/>"))
                 )
             );
-            content.append(error_output);
+            content.append(
+                $("<table/>").append(
+                    error_output,
+                    $("<tfoot/>").append($("<td colspan=3 style='min-height=20px;'/>"))
+                )
+            );
             fileinp.change(function(evt) {
                 if (evt.target.files[0]) {
                     var reader = new FileReader();
@@ -852,10 +860,13 @@ $.fn.SimpleFileUploadDlg = function (params) {
             });
             let dialog = BootstrapDialog.show({
                 title: this_button.data('title'),
-                type: BootstrapDialog.TYPE_DEFAULT,
+                type: BootstrapDialog.TYPE_INFO,
                 message: content
             });
+            dialog.$modalDialog.css('width', '800px'); /* larger dialog to increase readability of error output */
+
             doinp.click(function(){
+                error_output.empty();
                 let eparams =  {
                     'payload': $(this).data('payload'),
                     'filename': $(this).data('filename')
@@ -865,8 +876,7 @@ $.fn.SimpleFileUploadDlg = function (params) {
                         params.onAction(data, status);
                     }
                     if (data.validations && data.validations.length > 0) {
-                        // When validation errors are returned, write to textarea including original data lines.
-                        let output = [];
+                        // When validation errors are returned, write to error_output including original data lines.
                         let records = eparams.payload.split('\n');
                         records.shift();
                         for (r=0; r < records.length; ++r) {
@@ -874,14 +884,21 @@ $.fn.SimpleFileUploadDlg = function (params) {
                             for (i=0; i < data.validations.length ; ++i) {
                                 if (r == data.validations[i].sequence) {
                                     if (!found) {
-                                        output.push(records[data.validations[i].sequence]);
+                                        error_output.append($("<tr/>").append(
+                                            $("<td/>").append($("<i class='fa fa-bars'/>")),
+                                            $("<td style='min-width:5px;'/>"),
+                                            $("<td/>").text(records[data.validations[i].sequence]).css('white-space', 'nowrap')
+                                        ));
                                         found = true;
                                     }
-                                    output.push('!! ' + data.validations[i].message);
+                                    error_output.append($("<tr/>").append(
+                                        $("<td/>").append($("<i class='fa fa-times'/>")),
+                                        $("<td style='min-width:5px;'/>"),
+                                        $("<td/>").text('[' + data.validations[i].field + '] ' + data.validations[i].message).css('white-space', 'nowrap')
+                                    ));
                                 }
                             }
                         }
-                        error_output.val(output.join('\n')).show();
                     } else {
                         dialog.close();
                     }

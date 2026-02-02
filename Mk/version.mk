@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Franco Fichtner <franco@opnsense.org>
+# Copyright (c) 2023-2026 Franco Fichtner <franco@opnsense.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -23,12 +23,16 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-CORE_ABIS?=	25.7
+CORE_ABIS?=	26.1
 CORE_ADDITIONS?=#empty
-CORE_MESSAGE?=	Some will win, some will lose, some are born to sing the blues
+CORE_MESSAGE?=	One step ahead, one step behind it, now you gotta run to get even
 CORE_NAME?=	opnsense
 # adjust src/root/boot/lua/logo-hourglass.lua.in accordingly:
-CORE_NICKNAME?=	Visionary Viper
+CORE_NICKNAME?=	Witty Woodpecker
 CORE_TYPE?=	community
 # plugins that were migrated to core are here
 CORE_CONFLICTS?=firewall wireguard wireguard-go
+
+CORE_COPYRIGHT_HOLDER?=	Deciso B.V.
+CORE_COPYRIGHT_WWW?=	https://www.deciso.com/
+CORE_COPYRIGHT_YEARS?=	2014-2026

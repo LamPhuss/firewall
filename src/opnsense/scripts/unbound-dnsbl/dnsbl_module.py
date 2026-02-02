@@ -37,6 +37,7 @@ import time
 import dns
 import dns.name
 import unboundmodule
+sys.path.insert(0, "/var/unbound/unbound-dnsbl/") # unbound-check doesn't use a chroot
 sys.path.insert(0, "/unbound-dnsbl/")
 from lib import Query, ModuleContext
 from lib.dnsbl import DNSBL
@@ -145,7 +146,7 @@ def set_answer_block(qstate, qdata, query, match):
         if logger.stats_enabled:
             query.set_response(ACTION_BLOCK, SOURCE_LOCAL, bl, rcode,
                         time_diff_ms(qdata['start_time']), dnssec_status, 0)
-            mod_env['logger'].log_entry(query)
+            mod_env['logger'].log_entry(query, match)
         return True
 
     ttl = 3600
@@ -158,7 +159,7 @@ def set_answer_block(qstate, qdata, query, match):
         if logger.stats_enabled:
             query.set_response(ACTION_DROP, SOURCE_LOCAL, bl, RCODE_SERVFAIL,
                 time_diff_ms(qdata['start_time']), dnssec_status, 0)
-            mod_env['logger'].log_entry(query)
+            mod_env['logger'].log_entry(query, match)
         return False
     if ctx.dnssec_enabled:
         qstate.return_msg.rep.security = dnssec_status
@@ -166,7 +167,7 @@ def set_answer_block(qstate, qdata, query, match):
     if logger.stats_enabled:
         query.set_response(ACTION_BLOCK, SOURCE_LOCAL, bl, rcode,
             time_diff_ms(qdata['start_time']), dnssec_status, ttl)
-        mod_env['logger'].log_entry(query)
+        mod_env['logger'].log_entry(query, match)
     return True
 
 def operate(id, event, qstate, qdata):

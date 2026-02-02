@@ -70,6 +70,12 @@
                     <NetMaskRequired>Y</NetMaskRequired>
                     <AddressFamily>ipv4</AddressFamily>
                     <Required>Y</Required>
+                    <Constraints>
+                        <check001>
+                            <type>UniqueConstraint</type>
+                            <ValidationMessage>Subnet must be unique.</ValidationMessage>
+                        </check001>
+                    </Constraints>
                 </subnet>
                 <next_server type="NetworkField">
                     <NetMaskAllowed>N</NetMaskAllowed>
@@ -119,6 +125,9 @@
                     <v6_only_preferred type="IntegerField">
                         <MinimumValue>300</MinimumValue>
                     </v6_only_preferred>
+                    <v4_dnr type="TextField">
+                        <Mask>/^([^\n"])*$/u</Mask>
+                    </v4_dnr>
                 </option_data>
                 <match-client-id type="BooleanField">
                     <Default>1</Default>

@@ -1,5 +1,5 @@
 <menu>
-    <VPN visibility="delete">
+    <VPN>
       <WireGuard cssClass="fa fa-lock fa-fw">
           <Instances order="10" url="/ui/wireguard/general#instances"/>
           <Peers order="20" url="/ui/wireguard/general#peers"/>

@@ -38,7 +38,16 @@ $aclObj = new \OPNsense\Core\ACL();
     <div class="container-fluid">
       <div class="navbar-header">
         <a class="navbar-brand" href="/index.php">
-          <?php /* Logo removed */ ?>
+<?php if (get_themed_filename('/images/default-logo.svg', true)): ?>
+        <img class="brand-logo" src="<?= cache_safe(get_themed_filename('/images/default-logo.svg')) ?>" height="30" alt="logo" />
+<?php else: ?>
+        <img class="brand-logo" src="<?= cache_safe(get_themed_filename('/images/default-logo.png')) ?>" height="30" alt="logo" />
+<?php endif ?>
+<?php if (get_themed_filename('/images/icon-logo.svg', true)): ?>
+        <img class="brand-icon" src="<?= cache_safe(get_themed_filename('/images/icon-logo.svg')) ?>" height="30" alt="icon" />
+<?php else: ?>
+        <img class="brand-icon" src="<?= cache_safe(get_themed_filename('/images/icon-logo.png')) ?>" height="30" alt="icon" />
+<?php endif ?>
         </a>
         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navigation">
           <span class="sr-only">Toggle navigation</span>
@@ -99,10 +108,10 @@ $aclObj = new \OPNsense\Core\ACL();
                                   foreach ($subMenuItem->Children as $subsubMenuItem):?>
 <?php
                                     if ($subsubMenuItem->IsExternal == "Y"):?>
-                                            <a href="<?=$subsubMenuItem->Url;?>" target="_blank" rel="noopener noreferrer" class="list-group-item menu-level-3-item <?=$subsubMenuItem->Selected ? 'active' :'';?>"><?= html_safe($subsubMenuItem->VisibleName) ?></a>
+                                            <a href="<?=$subsubMenuItem->Url;?>" target="_blank" rel="noopener noreferrer" class="list-group-item menu-level-3-item <?=$subsubMenuItem->Selected ? 'active' :'';?>"><?= $subsubMenuItem->VisibleName ?></a>
 <?php
                                     elseif ($aclObj->isPageAccessible($_SESSION['Username'],$subsubMenuItem->Url)):?>
-                                            <a href="<?=$subsubMenuItem->Url;?>" class="list-group-item menu-level-3-item <?=$subsubMenuItem->Selected ? 'active' :'';?>"><?= html_safe($subsubMenuItem->VisibleName) ?></a>
+                                            <a href="<?=$subsubMenuItem->Url;?>" class="list-group-item menu-level-3-item <?=$subsubMenuItem->Selected ? 'active' :'';?>"><?= $subsubMenuItem->VisibleName ?></a>
 <?php
                                     endif;
                                   endforeach;?>

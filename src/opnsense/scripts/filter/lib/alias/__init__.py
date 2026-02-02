@@ -109,6 +109,9 @@ class Alias(object):
         for item in self._items:
             if item not in self._known_aliases or self.get_name() == item:
                 yield item
+            elif not self.supports_nesting():
+                # yield items unconditionally when nesting is not supported
+                yield item
 
     def uniqueid(self):
         """ generate an identification hash for this alias
@@ -137,6 +140,19 @@ class Alias(object):
             :return: boolean
         """
         if self._has_expired is None:
+            # XXX: At some point we probably want to refactor the Alias class to different types as implementations
+            # of a common base. Our current approach using BaseContentParser() has the disadvantage that we can't
+            # overwrite expired() implementation based on its type, which requires specific code here when
+            # expiry depends on external anchors.
+            if self._type == 'geoip':
+                geoip_anchor = '/usr/local/share/GeoIP/alias/NL-IPv4'
+                geoip_anchor_time = os.stat(geoip_anchor).st_mtime if os.path.isfile(geoip_anchor) else time.time()
+                if os.path.isfile(self._filename_alias_hash):
+                    self._has_expired = geoip_anchor_time > os.stat(self._filename_alias_hash).st_mtime
+                    if self._has_expired:
+                        # usual TTL doesn't apply if our geoip data is newer or missing
+                        return self._has_expired
+
             if self._ttl > 0 and os.path.isfile(self._filename_alias_hash):
                 fstat = os.stat(self._filename_alias_hash)
                 self._has_expired = time.time() - fstat.st_mtime > self._ttl
@@ -150,7 +166,7 @@ class Alias(object):
             it was an alias from us if such a file exists.
             :return: boolean
         """
-        return self.get_parser() is not None and os.path.isfile(self._filename_alias_hash)
+        return self.has_parser() is not None and os.path.isfile(self._filename_alias_hash)
 
     def cached(self):
         """ load cached contents in case we don't want to resolve the alias
@@ -208,7 +224,7 @@ class Alias(object):
                     with open(self._filename_alias_content, 'w') as f_out:
                         f_out.write(resolve_content_str)
 
-                if self.get_parser():
+                if self.has_parser():
                     # flush md5 hash to disk (when unchanged)
                     new_uniqueid = self.uniqueid()
                     old_uniqueid = None
@@ -245,6 +261,13 @@ class Alias(object):
             return AuthGroup(**self._properties)
         else:
             return None
+
+    def has_parser(self):
+        # should match the list above (get_parser may thrown an IOError at setup)
+        return self._type in [
+            'host', 'network', 'networkgroup', 'url', 'urltable', 'urljson',
+            'geoip', 'dynipv6host', 'mac', 'asn', 'authgroup'
+        ]
 
     def pre_process(self, skip_result=False):
         """ alias type pre processors
@@ -284,11 +307,17 @@ class Alias(object):
             return os.stat(self.get_filename()).st_size
         return 0
 
+    def supports_nesting(self):
+        """ return if this alias supports nesting
+        """
+        return self.get_type() not in ['geoip']
+
     def get_deps(self):
         """ fetch alias dependencies
-            :param in_data: raw input data (ruleset)
-            :return: new ruleset
         """
+        if not self.supports_nesting():
+            # when nesting is not supported
+            return
         for item in self._items:
             if item in self._known_aliases:
                 yield item

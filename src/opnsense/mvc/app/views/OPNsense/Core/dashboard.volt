@@ -42,6 +42,7 @@
 <script src="{{ cache_safe('/ui/js/widgets/BaseTableWidget.js') }}"></script>
 <script src="{{ cache_safe('/ui/js/widgets/BaseGaugeWidget.js') }}"></script>
 <link rel="stylesheet" type="text/css" href="{{ cache_safe(theme_file_or_default('/css/dashboard.css', theme_name)) }}" rel="stylesheet" />
+
 <script>
 $( document ).ready(function() {
     let chartBackgroundColor = getComputedStyle(document.body).getPropertyValue('--chart-js-background-color').trim();
@@ -81,4 +82,5 @@ $( document ).ready(function() {
     widgetManager.initialize();
 });
 </script>
+
 <div class="grid-stack"></div>

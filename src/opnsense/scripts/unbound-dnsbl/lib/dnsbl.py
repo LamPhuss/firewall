@@ -50,8 +50,8 @@ class DNSBL:
         self.size_file = size_file
         self.dnsbl_mtime_cache = 0
         self.dnsbl_update_time = 0
-        self.dnsbl_available = False
         self.dnsbl = None
+        self.warn_file = "/data/dnsbl_format_warning"
         self._context = context
 
         self._update_dnsbl()
@@ -63,36 +63,42 @@ class DNSBL:
         t = time.time()
         if (t - self.dnsbl_update_time) > 60:
             self.dnsbl_update_time = t
-            if not self._dnsbl_exists():
-                self.dnsbl_available = False
-                return
+            self._load_dnsbl()
+
+    def _load_dnsbl(self):
+        last_state = (self.dnsbl is not None)
+
+        if not self._dnsbl_exists():
+            self.dnsbl = None
+        else:
             fstat = os.stat(self.dnsbl_path).st_mtime
             if fstat != self.dnsbl_mtime_cache:
                 self.dnsbl_mtime_cache = fstat
                 log_info("dnsbl_module: updating blocklist.")
-                self._load_dnsbl()
+                with open(self.dnsbl_path, 'r') as f:
+                    try:
+                        self.dnsbl = json.load(f)
+                        if self._context and type(self.dnsbl.get('config')) is dict:
+                            if not self.dnsbl['config'].get('general'):
+                                # old format, needs blocklist reload
+                                self.dnsbl = None
+                                raise ValueError("incompatible blocklist")
+                            self._context.set_config(self.dnsbl['config'])
+                        log_info('dnsbl_module: blocklist loaded. length is %d' % len(self.dnsbl['data']))
+                    except (json.decoder.JSONDecodeError, KeyError, ValueError) as e:
+                        if not self.dnsbl or isinstance(e, ValueError):
+                            log_err("dnsbl_module: unable to parse blocklist file: %s. Please re-apply the blocklist settings." % e)
+                            open(self.warn_file, "a").close()
+                            return
+                        else:
+                            log_err("dnsbl_module: error parsing blocklist: %s, reusing last known state" % e)
 
-    def _load_dnsbl(self):
-        with open(self.dnsbl_path, 'r') as f:
-            try:
-                self.dnsbl = json.load(f)
-                if self._context and type(self.dnsbl.get('config')) is dict:
-                    if not self.dnsbl['config'].get('general'):
-                        # old format, needs blocklist reload
-                        raise ValueError("incompatible blocklist")
-                    self._context.set_config(self.dnsbl['config'])
-                log_info('dnsbl_module: blocklist loaded. length is %d' % len(self.dnsbl['data']))
-                with open(self.size_file, 'w') as sfile:
-                    sfile.write(str(len(self.dnsbl['data'])))
-            except (json.decoder.JSONDecodeError, KeyError, ValueError) as e:
-                if not self.dnsbl or isinstance(e, ValueError):
-                    log_err("dnsbl_module: unable to parse blocklist file: %s. Please re-apply the blocklist settings." % e)
-                    self.dnsbl_available = False
-                    return
-                else:
-                    log_err("dnsbl_module: error parsing blocklist: %s, reusing last known list" % e)
+        if os.path.exists(self.warn_file):
+            os.remove(self.warn_file)
 
-        self.dnsbl_available = True
+        if last_state != (self.dnsbl is not None):
+            with open(self.size_file, 'w') as sfile:
+                sfile.write(str(len(self.dnsbl['data'])) if self.dnsbl else '0')
 
     def _in_network(self, client, networks):
         if not networks:
@@ -113,7 +119,7 @@ class DNSBL:
     def policy_match(self, query: Query, qstate=None, orig=None):
         self._update_dnsbl()
 
-        if not self.dnsbl_available:
+        if not self.dnsbl:
             return False
 
         if not query.type in ('A', 'AAAA', 'CNAME', 'HTTPS'):
@@ -130,21 +136,22 @@ class DNSBL:
                     if (is_full_domain) or (not is_full_domain and meta.get('wildcard')):
                         policy = self._context.get_config(str(meta.get('idx')))
                         if policy:
+                            # this domain has a policy attached, disable caching for this domain
+                            # to prevent queries coming from different source nets to skip policy matching.
+                            if qstate and hasattr(qstate, 'no_cache_store'):
+                                qstate.no_cache_store = 1
                             if self._in_network(query.client, policy.get('source_nets')):
                                 r = policy.get('pass_regex')
                                 if r and (r.match(domain) or (orig and r.match(orig))):
                                     # if "orig" is defined, we know we are matching a CNAME.
-                                    # the CNAME may be blocked, while the original query is explicitly whitelisted.
-                                    # In these cases, the whitelisting should have priority since we don't expect
+                                    # the CNAME may be blocked, while the original query is explicitly allowlisted.
+                                    # In these cases, the allowlisting should have priority since we don't expect
                                     # users to trace the CNAMEs themselves.
                                     return False
                                 match = policy
                                 match['bl'] = meta.get('bl')
                                 break
                         else:
-                            # allow query, but do not cache.
-                            if qstate and hasattr(qstate, 'no_cache_store'):
-                                qstate.no_cache_store = 1
                             return False
 
             if '.' not in sub or not self._context.has_wildcards:

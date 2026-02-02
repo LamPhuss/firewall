@@ -1,5 +1,5 @@
 <menu>
-    <VPN visibility="delete">
+    <VPN>
         <IPsec cssClass="fa fa-lock fa-fw">
             <Connections order="5" url="/ui/ipsec/connections"/>
             <Keys order="30" VisibleName="Pre-Shared Keys" url="/ui/ipsec/pre_shared_keys"/>

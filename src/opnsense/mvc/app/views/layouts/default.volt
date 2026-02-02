@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <title>{{headTitle|default("Firewall") }} | {{system_hostname}}.{{system_domain}}</title>
+    <title>{{headTitle|default("OPNsense") }} | {{system_hostname}}.{{system_domain}}</title>
     {% set theme_name = ui_theme|default('opnsense') %}
 
     <!-- Favicon -->
@@ -214,7 +214,16 @@
       <div class="container-fluid">
         <div class="navbar-header">
           <a class="navbar-brand" href="/">
-            {# Logo removed #}
+            {% if file_exists(["/usr/local/opnsense/www/themes/",theme_name,"/build/images/default-logo.svg"]|join("")) %}
+                <img class="brand-logo" src="{{ cache_safe('/ui/themes/%s/build/images/default-logo.svg' | format(theme_name)) }}" height="30" alt="logo"/>
+            {% else %}
+                <img class="brand-logo" src="{{ cache_safe('/ui/themes/%s/build/images/default-logo.png' | format(theme_name)) }}" height="30" alt="logo"/>
+            {% endif %}
+            {% if file_exists(["/usr/local/opnsense/www/themes/",theme_name,"/build/images/icon-logo.svg"]|join("")) %}
+                <img class="brand-icon" src="{{ cache_safe('/ui/themes/%s/build/images/icon-logo.svg' | format(theme_name)) }}" height="30" alt="icon"/>
+            {% else %}
+                <img class="brand-icon" src="{{ cache_safe('/ui/themes/%s/build/images/icon-logo.png' | format(theme_name)) }}" height="30" alt="icon"/>
+            {% endif %}
           </a>
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navigation">
             <span class="sr-only">{{ lang._('Toggle navigation') }}</span>
@@ -224,13 +233,16 @@
           </button>
         </div>
         <button class="toggle-sidebar" data-toggle="tooltip right" title="{{ lang._('Toggle sidebar') }}" style="display:none;"><i class="fa fa-chevron-left"></i></button>
-          <div class="collapse navbar-collapse">
-            <ul class="nav navbar-nav navbar-right">
-              <li>
-                <span class="navbar-text" style="margin-left: 0">
-                  <i id="system_status" data-toggle="tooltip left" title="{{ lang._('Show system status') }}" style="cursor:pointer" class="fa fa-circle text-muted"></i>
-                </span>
-              </li>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li id="menu_messages">
+              <span class="navbar-text">{{session_username}}@{{system_hostname}}.{{system_domain}}</span>
+            </li>
+            <li>
+              <span class="navbar-text" style="margin-left: 0">
+                <i id="system_status" data-toggle="tooltip left" title="{{ lang._('Show system status') }}" style="cursor:pointer" class="fa fa-circle text-muted"></i>
+              </span>
+            </li>
             <li>
               <form class="navbar-form" role="search">
                 <div class="input-group">
@@ -275,7 +287,8 @@
         <!-- page footer -->
         <footer class="page-foot">
           <div class="container-fluid">
-            {# Footer branding removed #}
+            <a target="_blank" href="{{ product_website }}">{{ product_name }}</a> (c) {{ product_copyright_years }}
+            <a target="_blank" href="{{ product_copyright_url }}">{{ product_copyright_owner }}</a>
           </div>
         </footer>
       </div>

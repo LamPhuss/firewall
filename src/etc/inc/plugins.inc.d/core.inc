@@ -283,14 +283,6 @@ function core_cron()
         );
     }
 
-    if (!empty($config['system']['dhcpbackup']) && $config['system']['dhcpbackup'] > 0) {
-        $jobs[]['autocron'] = array(
-            '/usr/local/etc/rc.syshook.d/backup/20-dhcpleases',
-            '0',
-            '*/' . $config['system']['dhcpbackup']
-        );
-    }
-
     if (!empty($config['system']['netflowbackup']) && $config['system']['netflowbackup'] > 0) {
         $jobs[]['autocron'] = array(
             '/usr/local/etc/rc.syshook.d/backup/20-netflow',
@@ -319,7 +311,6 @@ function core_syslog()
 
     $logfacilities['audit'] = ['facility' => ['audit']];
     $logfacilities['configd'] = ['facility' => ['configd.py']];
-    $logfacilities['dhcpd'] = ['facility' => ['dhcpd']];
     $logfacilities['kernel'] = ['facility' => ['kernel']];
     $logfacilities['lighttpd'] = ['facility' => ['lighttpd']];
     $logfacilities['pkg'] = ['facility' => ['pkg', 'pkg-static']];
@@ -376,7 +367,7 @@ function core_xmlrpc_sync()
     $result[] = [
         'description' => gettext('System logging'),
         'section' => 'syslog,OPNsense.Syslog',
-        'id' => 'syslog',
+        'id' => 'syslog-ng',
         'services' => ['syslogd'],
     ];
 
@@ -412,6 +403,12 @@ function core_configure()
         'crl' => ['core_trust_crl'],
         'dns_reload' => ['system_resolver_configure'],
         'firmware_reload' => ['system_firmware_configure'],
+        'networking_reload' => [
+            'interface_dhcpv6_duid:0',
+            'system_sysctl_configure',
+            'interfaces_hardware',
+            'filter_configure:0',
+        ],
         'route_reload' => ['system_routing_configure:2'],
         'syslog_reset' => ['system_syslog_reset'],
         'trust_reload' => ['system_trust_configure'],
@@ -436,11 +433,9 @@ function core_user_changed_groups($unused, $username)
     if (is_array($config['system']['user'])) {
         foreach ($config['system']['user'] as $user) {
             if ($user['name'] == $username && (!empty($user['shell']) || $user['uid'] == 0)) {
-                exec("/usr/bin/groups " . escapeshellarg($username) . ' 2>/dev/null', $out, $ret);
-                $current_groups = [];
-                if (!$ret) {
-                    $current_groups = explode(" ", $out[0]);
-                }
+                $output = shell_safe('/usr/bin/groups %s 2> /dev/null', $username);
+                $current_groups = strlen($output) ? explode(' ', $output) : [];
+
                 foreach ($config['system']['group'] as $group) {
                     $in_group = false;
                     foreach (!empty($group['member']) ? $group['member'] : [] as $grp) {

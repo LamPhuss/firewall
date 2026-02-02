@@ -87,18 +87,8 @@ class Config extends Singleton
     }
 
     /**
-     * check if array is a sequential type.
-     * @param &array $arrayData array structure to check
-     * @return bool
-     */
-    private function isArraySequential(&$arrayData)
-    {
-        return is_array($arrayData) && ctype_digit(implode('', array_keys($arrayData)));
-    }
-
-    /**
      * serialize xml to array structure (backwards compatibility mode)
-     * @param null|array $forceList force specific tags to be contained in a list.
+     * @param null|array $forceList force specific tags to be contained in a list (providing them as array keys)
      * @param DOMNode $node node to read
      * @return string|array converted node data
      * @throws ConfigException when config could not be parsed
@@ -128,7 +118,7 @@ class Config extends Singleton
                     $old_content = $result[$xmlNodeName];
                     // check if array content is associative, move items to new list
                     // (handles first item of specific type)
-                    if (!$this->isArraySequential($old_content)) {
+                    if (!is_array($old_content) || !is_int(array_key_first($old_content))) {
                         $result[$xmlNodeName] = array();
                         $result[$xmlNodeName][] = $old_content;
                     }
@@ -178,7 +168,7 @@ class Config extends Singleton
     /**
      * convert an arbitrary config xml file to an array
      * @param $filename config xml filename to parse
-     * @param null $forceList items to treat as list
+     * @param null|array $forceList force specific tags to be contained in a list (providing them as array keys)
      * @return array interpretation of config file
      * @throws ConfigException when config could not be parsed
      */
@@ -250,10 +240,10 @@ class Config extends Singleton
                     }
                 }
                 continue;
-            } elseif (is_numeric($itemKey)) {
+            } elseif (is_int($itemKey)) {
                 // recurring tag (content), use parent tagname.
                 $childNode = $node->addChild($parentTagName);
-            } elseif ($this->isArraySequential($itemValue)) {
+            } elseif (is_array($itemValue) && is_int(array_key_first($itemValue))) {
                 // recurring tag, skip placeholder.
                 $childNode = $node;
             } else {
@@ -323,8 +313,11 @@ class Config extends Singleton
      */
     protected function init()
     {
+        $app = new AppConfig();
+
+        $this->config_file = $app->application->configDir . '/config.xml';
         $this->statusIsLocked = false;
-        $this->config_file = (new AppConfig())->application->configDir . '/config.xml';
+
         try {
             $this->load();
         } catch (\Exception $e) {
@@ -348,9 +341,12 @@ class Config extends Singleton
 
             /* in case there are no backups, restore defaults */
             $logger->error(gettext('No valid config.xml found, attempting to restore factory config.'));
-            $this->restoreBackup('/usr/local/etc/config.xml');
-            @chown($this->config_file, 'wwwonly'); /* XXX frontend owns file */
-            @chgrp($this->config_file, 'wheel'); /* XXX backend can work with it */
+            $this->restoreBackup($app->application->configDefault);
+
+            /* XXX perhaps better to fold this into restoreBackup()? */
+            list($user, $group) = explode(':', $app->globals->owner);
+            @chown($this->config_file, $user);
+            @chgrp($this->config_file, $group);
         }
     }
 
@@ -389,7 +385,7 @@ class Config extends Singleton
                 }
             );
 
-            $result = simplexml_load_string($xml);
+            $result = simplexml_load_string($xml, "SimpleXMLElement", LIBXML_NOBLANKS);
             restore_error_handler();
             if (!$this->statusIsLocked) {
                 flock($fp, LOCK_UN);

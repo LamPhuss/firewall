@@ -1,7 +1,7 @@
 <menu>
     <Interfaces>
-        <Assignments order="200" url="/interfaces_assign.php" cssClass="fa fa-pencil fa-fw" visibility="delete"/>
-        <Devices order="210" cssClass="fa fa-archive fa-fw" visibility="delete">
+        <Assignments order="200" url="/interfaces_assign.php" cssClass="fa fa-pencil fa-fw"/>
+        <Devices order="210" cssClass="fa fa-archive fa-fw">
             <Bridge url="/ui/interfaces/bridge"/>
             <GIF url="/ui/interfaces/gif"/>
             <GRE url="/ui/interfaces/gre"/>
@@ -13,18 +13,20 @@
             <VLAN url="/ui/interfaces/vlan"/>
             <VXLAN url="/ui/interfaces/vxlan"/>
         </Devices>
-        <Neighbors order="220" url="/ui/interfaces/neighbor" cssClass="fa fa-users fa-fw" visibility="delete"/>
+        <Neighbors order="220" cssClass="fa fa-users fa-fw">
+            <Manual VisibleName="Static Assignments" url="/ui/interfaces/neighbor"/>
+        </Neighbors>
         <Overview order="230" url="/ui/interfaces/overview" cssClass="fa fa-tasks fa-fw"/>
-        <Settings order="240" url="/system_advanced_network.php" cssClass="fa fa-cogs fa-fw" visibility="delete"/>
-        <VIP order="250" VisibleName="Virtual IPs" cssClass="fa fa-clone fa-fw" visibility="delete">
+        <Settings order="240" url="/ui/interfaces/settings" cssClass="fa fa-cogs fa-fw"/>
+        <VIP order="250" VisibleName="Virtual IPs" cssClass="fa fa-clone fa-fw">
             <Settings url="/ui/interfaces/vip"/>
             <Status url="/ui/diagnostics/interface/vip"/>
         </VIP>
-        <Wireless order="260" cssClass="fa fa-wifi fa-fw" visibility="delete">
+        <Wireless order="260" cssClass="fa fa-wifi fa-fw">
             <Devices url="/interfaces_wireless.php">
                 <Edit url="/interfaces_wireless_edit.php*" visibility="hidden"/>
             </Devices>
         </Wireless>
-        <Diagnostics order="270" cssClass="fa fa-medkit fa-fw" visibility="delete"/>
+        <Diagnostics order="270" cssClass="fa fa-medkit fa-fw"/>
     </Interfaces>
 </menu>

@@ -1,6 +1,6 @@
 <menu>
     <System>
-        <Settings visibility="delete">
+        <Settings>
             <Logging url="/ui/syslog"/>
         </Settings>
     </System>

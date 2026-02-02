@@ -329,7 +329,7 @@ function display_error_form($text)
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <title><?= gettext('Error') ?> | Firewall</title>
+    <title><?= gettext('Error') ?> | <?= $product->name() ?></title>
 
     <link href="<?= cache_safe(get_themed_filename('/css/main.css')) ?>" rel="stylesheet">
     <link href="<?= cache_safe(get_themed_filename('/images/favicon.png')) ?>" rel="shortcut icon">
@@ -370,7 +370,7 @@ function display_login_form($Login_Error)
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <title><?= gettext('Login') ?> | Firewall</title>
+    <title><?= gettext('Login') ?> | <?= $product->name() ?></title>
 
     <link href="<?= cache_safe(get_themed_filename('/css/main.css')) ?>" rel="stylesheet">
     <link href="<?= cache_safe(get_themed_filename('/images/favicon.png')) ?>" rel="shortcut icon">
@@ -388,7 +388,11 @@ function display_login_form($Login_Error)
     <main class="login-modal-container">
       <header class="login-modal-head" style="height:50px;">
         <div class="navbar-brand">
-          <?php /* Logo removed */ ?>
+    <?php if (get_themed_filename('/images/default-logo.svg', true)) : ?>
+          <img src="<?= cache_safe(get_themed_filename('/images/default-logo.svg')) ?>" height="30" alt="logo" />
+    <?php else : ?>
+          <img src="<?= cache_safe(get_themed_filename('/images/default-logo.png')) ?>" height="30" alt="logo" />
+    <?php endif ?>
         </div>
       </header>
 
@@ -429,7 +433,8 @@ function display_login_form($Login_Error)
 
       </main>
       <div class="login-foot text-center">
-        <?php /* Footer branding removed */ ?>
+        <a target="_blank" href="<?= $product->website() ?>"><?= $product->name() ?></a> (c) <?= $product->copyright_years() ?>
+        <a target="_blank" href="<?= $product->copyright_url() ?>"><?= $product->copyright_owner() ?></a>
       </div>
 
     </div>

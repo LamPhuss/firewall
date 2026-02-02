@@ -123,10 +123,6 @@ CORE_UID?=		789
 CORE_GROUP?=		${CORE_USER}
 CORE_GID?=		${CORE_UID}
 
-CORE_COPYRIGHT_HOLDER?=	Deciso B.V.
-CORE_COPYRIGHT_WWW?=	https://www.deciso.com/
-CORE_COPYRIGHT_YEARS?=	2014-2025
-
 CORE_DEPENDS_aarch64?=	py${CORE_PYTHON}-duckdb \
 			py${CORE_PYTHON}-numpy \
 			py${CORE_PYTHON}-pandas \
@@ -146,9 +142,9 @@ CORE_DEPENDS?=		ca_root_nss \
 			flock \
 			flowd \
 			hostapd \
+			hostwatch \
 			ifinfo \
 			iftop \
-			isc-dhcp44-server \
 			kea \
 			lighttpd \
 			monit \
@@ -336,7 +332,8 @@ package: lint-plist manifest-check package-check clean-wrksrc
 
 upgrade-check:
 	@if ! ${PKG} info ${CORE_NAME} > /dev/null; then \
-		echo ">>> Cannot find package.  Please run 'opnsense-update -t ${CORE_NAME}'" >&2; \
+		REAL_NAME=$$(pkg which -q /usr/local/opnsense/version/core); \
+		echo ">>> Cannot find installed package.  Use CORE_NAME=$${REAL_NAME%-*} instead." >&2; \
 		exit 1; \
 	fi
 	@if [ "$$(${VERSIONBIN} -vH)" = "${CORE_PKGVERSION} ${CORE_HASH}" ]; then \
@@ -347,7 +344,7 @@ upgrade-check:
 upgrade: upgrade-check clean-pkgdir package
 	@${PKG} delete -fy ${CORE_NAME} || true
 	@${PKG} add ${PKGDIR}/*.pkg
-	@${PLUGINCTL} -c webgui
+	${.CURDIR}/src/etc/rc.restart_webgui
 
 glint: sweep plist-fix lint
 
@@ -362,20 +359,8 @@ migrate:
 validate:
 	@${PLUGINCTL} -v
 
-# XXX we should stop treating AclConfig dir as the test's actual /conf dir
-TEST_NO_CLOBBER=	${TESTDIR}/app/models/OPNsense/ACL/AclConfig/config.xml
-
 test:
-.if exists(${TESTDIR})
-	@if [ "$$(${VERSIONBIN} -v)" != "${CORE_PKGVERSION}" ]; then \
-		echo "Installed version does not match, expected ${CORE_PKGVERSION}"; \
-		exit 1; \
-	fi
-	@cd ${TESTDIR} && cp ${TEST_NO_CLOBBER} ${TEST_NO_CLOBBER}.save && \
-	    phpunit || true; rm -rf ${TESTDIR}/.phpunit.result.cache \
-	    ${TESTDIR}/app/models/OPNsense/ACL/AclConfig/backup; \
-	    mv ${TEST_NO_CLOBBER}.save ${TEST_NO_CLOBBER}
-.endif
+	@cd ${TESTDIR} && phpunit || true; rm -rf ${TESTDIR}/.phpunit.result.cache
 
 clean: clean-pkgdir clean-wrksrc clean-mfcdir checkout
 

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (C) 2016 Deciso B.V.
+ * Copyright (C) 2016-2025 Deciso B.V.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -205,7 +205,8 @@ function filter_core_get_default_nat_outbound_networks()
 function filter_core_rules_system($fw, $defaults)
 {
     global $config;
-    $ipv6_disabled = !isset($config['system']['ipv6allow']);
+
+    $ipv6_disabled = !is_ipv6_allowed();
 
     $dhcrelay6_interfaces = plugins_run('dhcrelay_interfaces', ['inet6']);
     $dhcrelay6_interfaces = !empty($dhcrelay6_interfaces['dhcrelay']) ? $dhcrelay6_interfaces['dhcrelay'] : [];
@@ -213,7 +214,7 @@ function filter_core_rules_system($fw, $defaults)
     $fw->registerFilterRule(
         1,
         ['ipprotocol' => 'inet6','descr' => 'Block all IPv6', 'disabled' => !$ipv6_disabled,
-            '#ref' => 'system_advanced_network.php#ipv6allow'],
+            '#ref' => 'ui/interfaces/settings'],
         $defaults['block']
     );
 
@@ -224,12 +225,11 @@ function filter_core_rules_system($fw, $defaults)
         $defaults['block']
     );
 
-
     if (empty($config['system']['no_ipv6_rfc4890_req'])) {
         // IPv6 ICMP requirements
         $fw->registerFilterRule(
             1,
-            ['ipprotocol' => 'inet6', 'protocol' => 'ipv6-icmp', 'icmp6-type' => '1,2,135,136',
+            ['ipprotocol' => 'inet6', 'protocol' => 'ipv6-icmp', 'icmp6-type' => '1,2,3,4,135,136',
                 'statetype' => 'keep', 'descr' => 'IPv6 RFC4890 requirements (ICMP)', 'disabled' => $ipv6_disabled,
                 '#ref' => 'system_advanced_firewall.php#no_ipv6_rfc4890_req'],
             $defaults['pass']
@@ -376,7 +376,7 @@ function filter_core_rules_system($fw, $defaults)
         if (!$ipv6_disabled && in_array($intfinfo['ipaddrv6'], ['dhcp6', 'slaac'])) {
             $fw->registerFilterRule(1, [
                 'descr' => 'allow dhcpv6 client in ' . $intfinfo['descr'],
-                '#ref' => 'system_advanced_network.php#ipv6allow',
+                '#ref' => 'ui/interfaces/settings',
                 'interface' => $intf,
                 'protocol' => 'udp',
                 /* omit 'from' as the server may use a GUA instead */
@@ -386,7 +386,7 @@ function filter_core_rules_system($fw, $defaults)
             ], $defaults['pass']);
             $dhcpv6_opts = [
                 'descr' => 'allow dhcpv6 client out ' . $intfinfo['descr'],
-                '#ref' => 'system_advanced_network.php#ipv6allow',
+                '#ref' => 'ui/interfaces/settings',
                 'direction' => 'out',
                 'interface' => $intf,
                 'protocol' => 'udp',
@@ -400,8 +400,9 @@ function filter_core_rules_system($fw, $defaults)
             }
             $fw->registerFilterRule(1, $dhcpv6_opts, $defaults['pass']);
         }
+
         // IPv4
-        switch (empty($intfinfo['ipaddr']) ? "" : $intfinfo['ipaddr']) {
+        switch ($intfinfo['ipaddr'] ?? 'none') {
             case "pptp":
                 $fw->registerFilterRule(
                     1,
@@ -437,7 +438,7 @@ function filter_core_rules_system($fw, $defaults)
                 $fw->registerFilterRule(1, $dhcpv4_opts, $defaults['pass']);
                 break;
             default:
-                if (isset($config['dhcpd'][$intf]['enable'])) {
+                if (file_exists('/usr/local/www/services_dhcp.php') && isset($config['dhcpd'][$intf]['enable'])) {
                     $fw->registerFilterRule(
                         1,
                         ['protocol' => 'udp', 'direction' => 'in', 'from_port' => 68, 'to' => '255.255.255.255',
@@ -474,11 +475,13 @@ function filter_core_rules_system($fw, $defaults)
                 }
                 break;
         }
+
         // IPv6
         if ($ipv6_disabled) {
             continue;
         }
-        switch (isset($intfinfo['ipaddrv6']) ? $intfinfo['ipaddrv6'] : null) {
+
+        switch ($intfinfo['ipaddrv6'] ?? 'none') {
             case "6rd":
                 $fw->registerFilterRule(
                     1,
@@ -563,6 +566,7 @@ function filter_core_rules_system($fw, $defaults)
         'quick' => false, "descr" => "let out anything from firewall host itself"],
         $defaults['pass']
     );
+
     // ipsec
     if (!empty(iterator_to_array($fw->getInterfaceMapping())['enc0'])) {
         $fw->registerFilterRule(
@@ -630,6 +634,34 @@ function filter_core_rules_system($fw, $defaults)
                     }
                 }
             }
+        }
+    }
+
+    /* auto-generated DNAT rules */
+    foreach ((new OPNsense\Firewall\DNat(false))->rule->sortedBy(['sequence']) as $key => $rule) {
+        if ($rule->disabled->isEmpty() && $rule->pass == 'rule') {
+            $dnatrule = $rule->getNodeContent();
+            $tmprule = [
+                'ipprotocol' =>  $dnatrule['ipprotocol'],
+                'interface' => $dnatrule['interface'],
+                'protocol' =>  $dnatrule['protocol'],
+                'source' => $dnatrule['source'],
+                'destination' => [
+                    'network' => $dnatrule['target']
+                ],
+                'log' => $dnatrule['log'],
+                'descr' => $dnatrule['descr']
+            ];
+
+            if (!empty($dnatrule['destination']['port']) && !empty($dnatrule['local-port'])) {
+                $tmprule['destination']['port'] = $dnatrule['local-port'];
+                $parts = explode('-', $dnatrule['destination']['port']);
+                if (count($parts) == 2) {
+                    $range_end = $parts[1] - $parts[0] +  $dnatrule['local-port'];
+                    $dnatrule['local-port'] .= sprint("-%s", $range_end);
+                }
+            }
+            $fw->registerFilterRule(500000, $tmprule); /* automatic at the end of our ruleset */
         }
     }
 }
