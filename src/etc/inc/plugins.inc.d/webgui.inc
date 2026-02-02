@@ -52,8 +52,10 @@ function webgui_services()
 function webgui_configure_defer($verbose = false, $sleep = 3)
 {
     service_log('Starting web GUI...', $verbose);
+    service_log('Đang khởi động giao diện web...', $verbose);
     configdp_run('webgui restart', [$sleep]);
     service_log("deferred.\n", $verbose);
+    service_log("tạm hoãn.\n", $verbose);
 }
 
 function webgui_configure_do($verbose = false, $interface_map = null)
@@ -84,6 +86,7 @@ function webgui_configure_do($verbose = false, $interface_map = null)
     }
 
     service_log('Starting web GUI...', $verbose);
+    service_log('Đang khởi động giao diện web...', $verbose);
 
     $listeners = count($interfaces) ? [] : ['0.0.0.0', '::'];
 
@@ -97,6 +100,7 @@ function webgui_configure_do($verbose = false, $interface_map = null)
 
     if (!count($listeners)) {
         service_log("empty.\n", $verbose);
+        service_log("rỗng.\n", $verbose);
         return;
     }
 
@@ -138,6 +142,7 @@ function webgui_configure_do($verbose = false, $interface_map = null)
     if (!$fp || !flock($fp, LOCK_EX | LOCK_NB)) {
         fclose($fp);
         service_log("locked.\n", $verbose);
+        service_log("đang bị khóa.\n", $verbose);
         return;
     }
 
@@ -164,8 +169,10 @@ function webgui_configure_do($verbose = false, $interface_map = null)
     /* start lighttpd (the flock may be overkill but this has always been fragile so keep it) */
     if (mwexecf('/usr/local/bin/flock -ne /var/run/lighty-webConfigurator.pid /usr/local/sbin/lighttpd -f %s/lighttpd.conf', [$confdir])) {
         service_log("failed.\n", $verbose);
+        service_log("thất bại.\n", $verbose);
     } else {
         service_log("done.\n", $verbose);
+        service_log("hoàn tất.\n", $verbose);
     }
 
     flock($fp, LOCK_UN);
@@ -180,6 +187,7 @@ function webgui_create_selfsigned($verbose = false)
     $a_cert = &config_read_array('cert');
 
     service_log('Creating self-signed web GUI certificate...', $verbose);
+    service_log('Đang tạo chứng chỉ tự ký cho giao diện web...', $verbose);
 
     $cert = [];
     $cert['refid'] = uniqid();
@@ -211,6 +219,7 @@ function webgui_create_selfsigned($verbose = false)
     write_config('Created web GUI TLS certificate');
 
     service_log("done.\n", $verbose);
+    service_log("hoàn tất.\n", $verbose);
 }
 
 function webgui_generate_config($port, $cert, $key, $ca, $listeners, $confdir)

@@ -179,6 +179,7 @@ function ntpd_configure_do($verbose = false)
     }
 
     service_log('Starting NTP service...', $verbose);
+    service_log('Đang khởi động dịch vụ NTP...', $verbose);
 
     $driftfile = '/var/db/ntpd.drift';
     $statsdir = '/var/log/ntp';
@@ -468,6 +469,7 @@ function ntpd_configure_do($verbose = false)
     }
 
     service_log("done.\n", $verbose);
+    service_log("hoàn tất.\n", $verbose);
 }
 
 function ntpd_xmlrpc_sync()

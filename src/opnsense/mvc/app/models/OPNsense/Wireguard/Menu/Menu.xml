@@ -1,5 +1,5 @@
 <menu>
-    <VPN visibility="delete">
+    <VPN>
       <WireGuard cssClass="fa fa-lock fa-fw">
           <Instances order="10" url="/ui/wireguard/general#instances"/>
           <Peers order="20" url="/ui/wireguard/general#peers"/>
@@ -7,5 +7,14 @@
           <Status order="40" url="/ui/wireguard/diagnostics/"/>
           <LogFile order="50" VisibleName="Log File" url="/ui/diagnostics/log/core/wireguard"/>
       </WireGuard>
+      <OpenVPN cssClass="fa fa-lock fa-fw" visibility="delete">
+          <Instances order="10" url="/ui/openvpn/instances"/>
+          <CSC order="30" VisibleName="Client Specific Overrides" url="/ui/openvpn/client_overwrites"/>
+          <ClientExport order="40" VisibleName="Client Export" url="/ui/openvpn/export">
+              <Edit url="/ui/openvpn/export?*" visibility="hidden"/>
+          </ClientExport>
+          <Status order="60" VisibleName="Connection Status" url="/ui/openvpn/status"/>
+          <LogFile order="70" VisibleName="Log File" url="/ui/diagnostics/log/core/openvpn"/>
+      </OpenVPN>
     </VPN>
 </menu>

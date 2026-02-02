@@ -156,10 +156,12 @@ function wireguard_configure_do($verbose = false)
     }
 
     service_log('Configuring WireGuard VPN...', $verbose);
+    service_log('Đang cấu hình WireGuard VPN...', $verbose);
 
     configd_run('wireguard configure');
 
     service_log("done.\n", $verbose);
+    service_log("hoàn tất.\n", $verbose);
 }
 
 function wireguard_sync($verbose = false)
@@ -180,10 +182,12 @@ function wireguard_sync($verbose = false)
     }
 
     service_log('Synchronizing WireGuard VPN...', $verbose);
+    service_log('Đang đồng bộ WireGuard VPN...', $verbose);
 
     foreach ($instances as $device => $config) {
         mwexecf('/usr/bin/wg syncconf %s %s', [$device, $config]);
     }
 
     service_log("done.\n", $verbose);
+    service_log("hoàn tất.\n", $verbose);
 }

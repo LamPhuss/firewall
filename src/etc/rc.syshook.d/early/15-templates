@@ -1,4 +1,5 @@
 #!/bin/sh
 
 echo -n "Generating configuration: "
+echo -n "Đang tạo cấu hình: "
 /usr/local/opnsense/service/template_ctl.py \*

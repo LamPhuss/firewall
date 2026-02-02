@@ -1,7 +1,7 @@
 <menu>
     <System>
-        <Settings visibility="delete">
-            <Logging url="/ui/syslog"/>
+        <Settings>
+            <Logging url="/ui/syslog" visibility="delete"/>
         </Settings>
     </System>
 </menu>

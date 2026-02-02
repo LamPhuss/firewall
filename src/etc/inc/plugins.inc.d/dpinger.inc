@@ -134,6 +134,7 @@ function dpinger_configure_do($verbose = false, $gwname_map = null)
     }
 
     service_log(sprintf('Setting up gateway monitor%s...', empty($gwname_map) ? '' : ' for ' . join(', ', $gwname_map)), $verbose);
+    service_log(sprintf('Đang thiết lập giám sát gateway%s...', empty($gwname_map) ? '' : ' cho ' . join(', ', $gwname_map)), $verbose);
 
     foreach (dpinger_processes() as $running_gwname => $proc) {
         if (!empty($gwname_map) && !in_array($running_gwname, $gwname_map)) {
@@ -285,6 +286,7 @@ function dpinger_configure_do($verbose = false, $gwname_map = null)
     }
 
     service_log("done.\n", $verbose);
+    service_log("hoàn tất.\n", $verbose);
 }
 
 function dpinger_run()

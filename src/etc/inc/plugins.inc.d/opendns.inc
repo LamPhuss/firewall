@@ -41,11 +41,13 @@ function opendns_configure_do($verbose = false)
 
     if (!empty($config['opendns']['enable'])) {
         service_log('Configure OpenDNS...', $verbose);
+        service_log('Đang cấu hình OpenDNS...', $verbose);
 
         $result = opendns_register($config['opendns']);
         log_msg("opendns response: $result");
 
         service_log("done.\n", $verbose);
+        service_log("hoàn tất.\n", $verbose);
     }
 }
 

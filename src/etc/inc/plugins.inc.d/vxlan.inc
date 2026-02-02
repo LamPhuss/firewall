@@ -65,6 +65,7 @@ function vxlan_configure_do($verbose = false, $device = null)
 
     if (!empty($vxlans)) {
         service_log(sprintf('Configuring VXLAN interface%s...', empty($device) ? 's' : " {$device}"), $verbose);
+        service_log(sprintf('Đang cấu hình giao diện VXLAN%s...', empty($device) ? '' : " {$device}"), $verbose);
     }
 
     $all_addresses = array();
@@ -159,6 +160,7 @@ function vxlan_configure_do($verbose = false, $device = null)
 
     if (!empty($vxlans)) {
         service_log("done.\n", $verbose);
+        service_log("hoàn tất.\n", $verbose);
     }
 
     // configure attached interface when devices have changed

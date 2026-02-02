@@ -115,6 +115,7 @@ function dhcrelay_configure_id($verbose = false, $id_map = null)
     }
 
     service_log(sprintf('Starting DHCP relay%s...', empty($id_map) ? 's' : ' for ' . join(', ', $id_map)), $verbose);
+    service_log(sprintf('Đang khởi động DHCP relay%s...', empty($id_map) ? '' : ' cho ' . join(', ', $id_map)), $verbose);
 
     $iflist = get_configured_interface_with_descr();
     $ifconfig_details = legacy_interfaces_details();
@@ -175,6 +176,7 @@ function dhcrelay_configure_id($verbose = false, $id_map = null)
     }
 
     service_log("done.\n", $verbose);
+    service_log("hoàn tất.\n", $verbose);
 }
 
 function dhcrelay_bound_instances($family = null)

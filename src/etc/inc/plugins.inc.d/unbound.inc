@@ -467,6 +467,7 @@ function unbound_configure_do($verbose = false, $interface_map = null)
     }
 
     service_log('Starting Unbound DNS...', $verbose);
+    service_log('Đang khởi động Unbound DNS...', $verbose);
 
     unbound_generate_config();
 
@@ -489,6 +490,7 @@ function unbound_configure_do($verbose = false, $interface_map = null)
     waitforpid('/var/run/unbound.pid', 10);
 
     service_log("done.\n", $verbose);
+    service_log("hoàn tất.\n", $verbose);
 }
 
 function unbound_add_host_entries($ifconfig_details)
