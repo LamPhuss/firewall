@@ -251,11 +251,14 @@ function openssh_configure_do($verbose = false, $interface_map = null)
     $fobj->truncate(0)->write($sshconf);
 
     service_log('Configuring OpenSSH...', $verbose);
+    service_log('Đang cấu hình OpenSSH...', $verbose);
 
     if ((count($interfaces) && !count($listeners)) || mwexecf('/usr/bin/protect -i /usr/local/sbin/sshd')) {
         service_log("failed.\n", $verbose);
+        service_log("thất bại.\n", $verbose);
     } else {
         service_log("done.\n", $verbose);
+        service_log("hoàn tất.\n", $verbose);
     }
 
     unset($fobj);

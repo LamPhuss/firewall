@@ -119,6 +119,7 @@ function radvd_configure_do($verbose = false, $ignorelist = [])
     }
 
     service_log('Starting router advertisement service...', $verbose);
+    service_log('Đang khởi động dịch vụ quảng bá router...', $verbose);
 
     $ifconfig_details = legacy_interfaces_details();
     $radvdconf = "# Automatically generated, do not edit\n";
@@ -501,4 +502,5 @@ function radvd_configure_do($verbose = false, $ignorelist = [])
     }
 
     service_log("done.\n", $verbose);
+    service_log("hoàn tất.\n", $verbose);
 }

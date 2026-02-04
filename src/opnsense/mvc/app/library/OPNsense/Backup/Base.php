@@ -78,7 +78,7 @@ abstract class Base
         if (file_exists("{$file}.enc") && !$retval) {
             $version = Shell::shell_safe('opnsense-version -Nv');
             $result = "---- BEGIN {$tag} ----\n";
-            $result .= "Version: {$version}\n";
+            // TODO $result .= "Version: {$version}\n";
             $result .= "Cipher: " . strtoupper($cipher) . "\n";
             $result .= "PBKDF2: " . $pbkdf2 . "\n";
             $result .= "Hash: " . strtoupper($hash) . "\n\n";

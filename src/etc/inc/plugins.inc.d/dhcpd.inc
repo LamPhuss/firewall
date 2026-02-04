@@ -176,6 +176,7 @@ function dhcpd_dhcp4_configure($verbose = false)
     }
 
     service_log('Starting DHCPv4 service...', $verbose);
+    service_log('Đang khởi động dịch vụ DHCPv4...', $verbose);
 
     killbypid('/var/dhcpd/var/run/dhcpd.pid');
 
@@ -811,6 +812,7 @@ EOD;
     }
 
     service_log("done.\n", $verbose);
+    service_log("hoàn tất.\n", $verbose);
 }
 
 function dhcpd_zones($ddns_zones, $ipproto = 'inet')
@@ -860,6 +862,7 @@ function dhcpd_dhcp6_configure($verbose = false, $blacklist = [])
     }
 
     service_log('Starting DHCPv6 service...', $verbose);
+    service_log('Đang khởi động dịch vụ DHCPv6...', $verbose);
 
     killbypid('/var/dhcpd/var/run/dhcpdv6.pid');
     killbypid('/var/run/dhcpleases6.pid');
@@ -1193,6 +1196,7 @@ EOD;
     }
 
     service_log("done.\n", $verbose);
+    service_log("hoàn tất.\n", $verbose);
 }
 
 function dhcpd_staticmap($proto = null, $valid_addresses = true, $ifconfig_details = null, $allow_disabled = false)

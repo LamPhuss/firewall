@@ -23,6 +23,77 @@ CMD_RESTORE="/usr/local/opnsense/scripts/shell/restore.sh"
 CMD_SETADDR="/usr/local/opnsense/scripts/shell/setaddr.php"
 CMD_SETPORTS="/usr/local/opnsense/scripts/shell/setports.php"
 CMD_SHELL="/bin/csh"
+CMD_LANGMODE="/usr/local/opnsense/scripts/shell/langmode.php"
+
+# Load language mode from config XML (default to "en" if not set)
+LANG_MODE="en"
+if [ -f "${CMD_LANGMODE}" ]; then
+	LANG_MODE=$(php "${CMD_LANGMODE}" get 2>/dev/null || echo "en")
+fi
+
+print_menu()
+{
+	# TODO: add more options (đã Việt Hóa)
+	echo
+	if [ "${LANG_MODE}" = "vi" ]; then
+		echo "  0) Đăng xuất                           7) Kiểm tra kết nối (ping)"
+		echo "  1) Gán cổng mạng                       8) Mở shell"
+		echo "  2) Đặt địa chỉ IP cho cổng             9) pfTop"
+		echo "  3) Đặt lại mật khẩu root              10) Nhật ký tường lửa"
+		echo "  4) Đưa về mặc định ban đầu            11) Tải lại tất cả dịch vụ"
+		echo "  5) Tắt nguồn hệ thống                 12) Cập nhật từ console"
+		echo "  6) Khởi động lại hệ thống             13) Khôi phục bản sao lưu"
+		echo "                                        14) Chuyển sang tiếng Anh"
+		echo
+		read -p "Chọn một tùy chọn: " OPCODE
+	else
+		echo "  0) Logout                              7) Ping host"
+		echo "  1) Assign interfaces                   8) Shell"
+		echo "  2) Set interface IP address            9) pfTop"
+		echo "  3) Reset the root password            10) Firewall log"
+		echo "  4) Reset to factory defaults          11) Reload all services"
+		echo "  5) Power off system                   12) Update from console"
+		echo "  6) Reboot system                      13) Restore a backup"
+		echo "                                       14) Switch to Vietnamese"
+		echo
+		read -p "Enter an option: " OPCODE
+	fi
+	echo
+}
+
+toggle_language()
+{
+	# Toggle language mode and save to config XML
+	if [ -f "${CMD_LANGMODE}" ]; then
+		NEW_LANG=$(php "${CMD_LANGMODE}" toggle 2>/dev/null)
+		if [ $? -eq 0 ] && [ -n "${NEW_LANG}" ]; then
+			LANG_MODE="${NEW_LANG}"
+			if [ "${LANG_MODE}" = "vi" ]; then
+				echo "Đã chuyển sang tiếng Việt."
+			else
+				echo "Switched to English."
+			fi
+		else
+			# Fallback to local variable if PHP script fails
+			if [ "${LANG_MODE}" = "vi" ]; then
+				LANG_MODE="en"
+				echo "Switched to English."
+			else
+				LANG_MODE="vi"
+				echo "Đã chuyển sang tiếng Việt."
+			fi
+		fi
+	else
+		# Fallback if langmode.php doesn't exist
+		if [ "${LANG_MODE}" = "vi" ]; then
+			LANG_MODE="en"
+			echo "Switched to English."
+		else
+			LANG_MODE="vi"
+			echo "Đã chuyển sang tiếng Việt."
+		fi
+	fi
+}
 
 # rc.d may call this while being root using `su -m user -c ...'
 # and it has arguments to pass through to the shell.  It creates
@@ -117,17 +188,7 @@ ${CMD_BANNER}
 # Failure to exit at that moment would lead to an infinite loop.
 set -e
 
-echo
-echo "  0) Logout                              7) Ping host"
-echo "  1) Assign interfaces                   8) Shell"
-echo "  2) Set interface IP address            9) pfTop"
-echo "  3) Reset the root password            10) Firewall log"
-echo "  4) Reset to factory defaults          11) Reload all services"
-echo "  5) Power off system                   12) Update from console"
-echo "  6) Reboot system                      13) Restore a backup"
-echo
-read -p "Enter an option: " OPCODE
-echo
+print_menu
 
 # The scripts we'll call below may return non-zero, don't exit if they do
 set +e
@@ -175,6 +236,9 @@ case ${OPCODE} in
 	;;
 13)
 	${CMD_RESTORE}
+	;;
+14)
+	toggle_language
 	;;
 *)
 	;;

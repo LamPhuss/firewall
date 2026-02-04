@@ -1111,6 +1111,7 @@ function openvpn_configure_do($verbose = false, $interface_map = null, $carp_eve
     }
 
     service_log('Syncing OpenVPN settings...', $verbose);
+    service_log('Đang đồng bộ cấu hình OpenVPN...', $verbose);
 
     $reconfigured = false;
 
@@ -1131,6 +1132,7 @@ function openvpn_configure_do($verbose = false, $interface_map = null, $carp_eve
     }
 
     service_log("done.\n", $verbose);
+    service_log("hoàn tất.\n", $verbose);
 }
 
 

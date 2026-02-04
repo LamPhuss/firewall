@@ -43,7 +43,7 @@
             <ignore>true</ignore>
         </grid_view>
     </field>
-    <field>
+    <!-- <field>
         <id>user.scrambled_password</id>
         <label>Scrambled Password</label>
         <type>checkbox</type>
@@ -53,7 +53,7 @@
             <type>boolean</type>
             <formatter>boolean</formatter>
         </grid_view>
-    </field>
+    </field> -->
     <field>
         <id>user.descr</id>
         <label>Full name</label>
@@ -81,7 +81,7 @@
             <visible>false</visible>
         </grid_view>
     </field>
-    <field>
+    <!-- <field>
         <id>user.landing_page</id>
         <label>Preferred landing page</label>
         <type>text</type>
@@ -105,7 +105,7 @@
         <grid_view>
             <visible>false</visible>
         </grid_view>
-    </field>
+    </field> -->
     <field>
         <id>user.expires</id>
         <label>Expiration date</label>
@@ -131,7 +131,7 @@
             <visible>false</visible>
         </grid_view>
     </field>
-    <field>
+    <!-- <field>
         <id>user.otp_seed</id>
         <label>OTP seed</label>
         <type>text</type>
@@ -147,5 +147,5 @@
         <grid_view>
             <ignore>true</ignore>
         </grid_view>
-    </field>
+    </field> -->
 </form>
