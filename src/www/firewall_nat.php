@@ -165,7 +165,7 @@ $( document ).ready(function() {
       // delete single
       BootstrapDialog.show({
         type:BootstrapDialog.TYPE_DANGER,
-        title: "<?= gettext("Port Forward");?>",
+        title: "<?= gettext("Port Forwarding");?>",
         message: "<?=gettext("Do you really want to delete this rule?");?>",
         buttons: [{
                   label: "<?= gettext("No");?>",
@@ -184,7 +184,7 @@ $( document ).ready(function() {
       // delete selected
       BootstrapDialog.show({
         type:BootstrapDialog.TYPE_DANGER,
-        title: "<?= gettext("Port Forward");?>",
+        title: "<?= gettext("Port Forwarding");?>",
         message: "<?=gettext("Do you really want to delete the selected rules?");?>",
         buttons: [{
                   label: "<?= gettext("No");?>",

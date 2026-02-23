@@ -81,5 +81,4 @@ $( document ).ready(function() {
     widgetManager.initialize();
 });
 </script>
-<h1>gumayusi keria</h1>
 <div class="grid-stack"></div>

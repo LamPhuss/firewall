@@ -26658,7 +26658,12 @@ msgstr "OSPFv3"
 #. File: /usr/lang/src/models.php, line: 368
 #: 
 msgid "One-to-One"
-msgstr "Một-một"
+msgstr "Ánh xạ một-một"
+
+#. File: /usr/lang/src/models.php, line: 368
+#: 
+msgid "One-to-One NAT"
+msgstr "Ánh xạ một-một"
 
 #. File: /usr/lang/src/models.php, line: 369
 #: 
@@ -27064,12 +27069,20 @@ msgstr "Khoảng thời gian bỏ phiếu cần phải là giá trị số nguy�
 #. File: /usr/lang/src/models.php, line: 460
 #: 
 msgid "Port Forward"
-msgstr "Chuyển tiếp Cổng"
+msgstr "Cổng chuyển tiếp"
+
+#. File: /usr/core/src/www/firewall_nat.php, line: 160
+#. File: /usr/core/src/www/firewall_nat.php, line: 161
+#. File: /usr/core/src/www/firewall_nat.php, line: 180
+#. File: /usr/lang/src/models.php, line: 460
+#: 
+msgid "Port Forwarding"
+msgstr "Chuyển tiếp cổng"
 
 #. File: /usr/lang/src/models.php, line: 461
 #: 
 msgid "Port Probe"
-msgstr "Thăm dò Cổng"
+msgstr "Cổng Probe"
 
 #. File: /usr/lang/src/models.php, line: 462
 #: 
@@ -45624,7 +45637,7 @@ msgstr "IP nguồn: số phiên tích lũy"
 #. File: /usr/lang/src/models.php, line: 1274
 #: 
 msgid "Source NAT"
-msgstr "Nguồn NAT"
+msgstr "NAT nguồn"
 
 #. File: /usr/lang/src/models.php, line: 1313
 #: 

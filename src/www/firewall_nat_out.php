@@ -129,7 +129,7 @@ include("head.inc");
         // delete single
         BootstrapDialog.show({
           type:BootstrapDialog.TYPE_DANGER,
-          title: "<?= gettext("Nat")." ".gettext("Outbound");?>",
+          title: "<?= gettext("Nat")." ".gettext("Source NAT");?>",
           message: "<?=gettext("Do you really want to delete this rule?");?>",
           buttons: [{
                     label: "<?= gettext("No");?>",
@@ -148,7 +148,7 @@ include("head.inc");
         // delete selected
         BootstrapDialog.show({
           type:BootstrapDialog.TYPE_DANGER,
-          title: "<?=gettext("Nat")." ".gettext("Outbound");?>",
+          title: "<?=gettext("Nat")." ".gettext("Source NAT");?>",
           message: "<?=gettext("Do you really want to delete the selected rules?");?>",
           buttons: [{
                     label: "<?= gettext("No");?>",
